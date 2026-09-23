@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronRight } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MotionChevron = motion.create(ChevronRight);
@@ -177,6 +177,7 @@ export interface Sidebar001ItemProps {
   label: React.ReactNode;
   isActive: boolean;
   isNew?: boolean;
+  isDone?: boolean;
   className?: string;
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
@@ -186,6 +187,7 @@ export const Sidebar001Item = memo(function Sidebar001Item({
   label,
   isActive,
   isNew,
+  isDone,
   className,
   onClick,
 }: Sidebar001ItemProps) {
@@ -255,6 +257,12 @@ export const Sidebar001Item = memo(function Sidebar001Item({
           <span className="relative z-1 truncate">{label}</span>
           {isNew && (
             <span className="size-1.5 rounded-full bg-accent-pro shrink-0" />
+          )}
+          {isDone && (
+            <Check
+              aria-label="Completed"
+              className="relative z-1 size-3.5 shrink-0 text-accent-pro"
+            />
           )}
         </a>
       </motion.div>
