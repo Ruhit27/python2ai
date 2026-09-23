@@ -19,7 +19,7 @@ function CheatsheetCard({ sheet }: { sheet: Cheatsheet }) {
       <h3 className="mt-5 font-heading text-lg uppercase tracking-tight text-black/90">
         {sheet.title}
       </h3>
-      <p className="mt-2 font-quicksand text-sm font-medium leading-relaxed text-black/70">
+      <p className="mt-2 font-sans text-sm font-medium leading-relaxed text-black/70">
         {sheet.description}
       </p>
     </Link>
@@ -34,7 +34,7 @@ export default function CheatsheetsPage() {
         <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
           Quick-reference <span className="gradient-text">cheatsheets</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-xl font-quicksand text-base font-medium text-muted">
+        <p className="mx-auto mt-4 max-w-xl font-sans text-base font-medium text-muted">
           The essentials, condensed — no fluff, just what you need on hand.
         </p>
       </div>

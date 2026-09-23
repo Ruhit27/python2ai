@@ -145,14 +145,14 @@ export default function Quiz({ questions, accent, title = "Quiz Time" }: QuizPro
             </span>
             <div>
               <h3 className="font-heading text-2xl tracking-tight">{title}</h3>
-              <p className="mt-2 font-quicksand text-sm font-medium text-muted">
+              <p className="mt-2 font-sans text-sm font-medium text-muted">
                 {total} questions · test what you&apos;ve learned so far
               </p>
             </div>
             <button
               type="button"
               onClick={start}
-              className="mt-2 rounded-full px-6 py-2.5 font-quicksand text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              className="mt-2 rounded-full px-6 py-2.5 font-sans text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
               style={{ backgroundColor: accent }}
             >
               Start Quiz
@@ -216,7 +216,7 @@ export default function Quiz({ questions, accent, title = "Quiz Time" }: QuizPro
                     onClick={() => selectOption(i)}
                     disabled={revealed}
                     className={cn(
-                      "flex items-center justify-between rounded-xl border px-4 py-3 text-left font-quicksand text-sm font-medium transition-colors",
+                      "flex items-center justify-between rounded-xl border px-4 py-3 text-left font-sans text-sm font-medium transition-colors",
                       !revealed && "border-border bg-surface hover:border-foreground/30",
                       revealed && isCorrectAnswer && "border-green-500/60 bg-green-500/10 text-foreground",
                       revealed &&
@@ -245,7 +245,7 @@ export default function Quiz({ questions, accent, title = "Quiz Time" }: QuizPro
                   transition={{ duration: 0.25 }}
                   style={{ overflow: "hidden" }}
                 >
-                  <p className="mt-4 font-quicksand text-sm font-medium leading-relaxed text-muted">
+                  <p className="mt-4 font-sans text-sm font-medium leading-relaxed text-muted">
                     <span className={cn("font-bold", isCorrectSelection ? "text-green-500" : "text-red-400")}>
                       {isCorrectSelection ? "Correct — " : "Not quite — "}
                     </span>
@@ -259,7 +259,7 @@ export default function Quiz({ questions, accent, title = "Quiz Time" }: QuizPro
               <button
                 type="button"
                 onClick={next}
-                className="mt-5 w-full rounded-xl py-2.5 font-quicksand text-sm font-bold text-black transition-transform hover:-translate-y-0.5 sm:w-auto sm:px-6"
+                className="mt-5 w-full rounded-xl py-2.5 font-sans text-sm font-bold text-black transition-transform hover:-translate-y-0.5 sm:w-auto sm:px-6"
                 style={{ backgroundColor: accent }}
               >
                 {index + 1 < total ? "Next Question" : "See Results"}
@@ -284,11 +284,11 @@ export default function Quiz({ questions, accent, title = "Quiz Time" }: QuizPro
               <Trophy className="h-7 w-7" style={{ color: accent }} />
             </span>
             <h3 className="font-heading text-2xl tracking-tight">{grade}</h3>
-            <p className="font-quicksand text-4xl font-bold text-foreground">
+            <p className="font-sans text-4xl font-bold text-foreground">
               {score}
               <span className="text-muted">/{total}</span>
             </p>
-            <p className="font-quicksand text-sm font-medium text-muted">{percent}% correct</p>
+            <p className="font-sans text-sm font-medium text-muted">{percent}% correct</p>
             {bestStreak >= 3 && (
               <span className="flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1 font-mono text-xs text-orange-400">
                 <Flame className="h-3.5 w-3.5" />
@@ -298,7 +298,7 @@ export default function Quiz({ questions, accent, title = "Quiz Time" }: QuizPro
             <button
               type="button"
               onClick={start}
-              className="mt-3 flex items-center gap-2 rounded-full border border-border px-5 py-2 font-quicksand text-sm font-bold text-foreground transition-colors hover:border-foreground/40"
+              className="mt-3 flex items-center gap-2 rounded-full border border-border px-5 py-2 font-sans text-sm font-bold text-foreground transition-colors hover:border-foreground/40"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Retry Quiz

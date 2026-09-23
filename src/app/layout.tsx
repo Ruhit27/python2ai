@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Bowlby_One_SC, Quicksand } from "next/font/google";
+import { Inter, Geist_Mono, Bowlby_One_SC } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// SF Pro can't be self-hosted, so Apple devices get it via the system font
+// stack in globals.css; Inter is the closest match everywhere else.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -19,12 +21,6 @@ const bowlbyOneSC = Bowlby_One_SC({
   subsets: ["latin"],
 });
 
-const quicksand = Quicksand({
-  variable: "--font-quicksand",
-  weight: ["500", "700"],
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "python2ai — Python to AI Engineer",
   description:
@@ -35,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${bowlbyOneSC.variable} ${quicksand.variable} dark h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} ${bowlbyOneSC.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Navbar />

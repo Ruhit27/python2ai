@@ -35,6 +35,39 @@ function renderInline(text: string): ReactNode {
   );
 }
 
+/** DOM id for a `## ` heading, shared by the renderer and the summary chips that scroll to it. */
+export function headingId(title: string) {
+  return (
+    "section-" +
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+  );
+}
+
+const WORDS_PER_MINUTE = 200;
+// Code is skimmed and copied, not read word by word, so it counts for less.
+const CODE_WORD_WEIGHT = 0.3;
+
+const countWords = (text: string) => text.split(/\s+/).filter(Boolean).length;
+
+/** Reading time and `## ` section titles, computed from a lesson's markdown. */
+export function getLessonMeta(content: string): { minutes: number; headings: string[] } {
+  let codeWords = 0;
+  const prose = content.replace(FENCE_RE, (_, _lang: string, code: string) => {
+    codeWords += countWords(code);
+    return "\n\n";
+  });
+  const words = countWords(prose);
+  const headings = prose
+    .split("\n")
+    .filter((l) => l.startsWith("## "))
+    .map((l) => l.slice(3).trim());
+  const minutes = Math.max(1, Math.round((words + codeWords * CODE_WORD_WEIGHT) / WORDS_PER_MINUTE));
+  return { minutes, headings };
+}
+
 function renderParagraphs(text: string, accent: string, state: { key: number; leadUsed: boolean }): ReactNode[] {
   const blocks: ReactNode[] = [];
   const paragraphs = text
@@ -47,17 +80,31 @@ function renderParagraphs(text: string, accent: string, state: { key: number; le
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
+    const isHeading = lines.length === 1 && lines[0].startsWith("## ");
     const isList = lines.length > 0 && lines.every((l) => l.startsWith("- "));
     const isQuote = lines.length > 0 && lines.every((l) => l.startsWith("> "));
     const k = state.key++;
     const delay = staggerDelay(k);
 
-    if (isQuote) {
+    if (isHeading) {
+      const title = lines[0].slice(3).trim();
+      blocks.push(
+        <Reveal key={k} delay={delay}>
+          <h2
+            id={headingId(title)}
+            className="mb-1 mt-10 flex scroll-mt-16 items-center gap-2.5 font-sans text-xl font-bold tracking-tight text-foreground first:mt-6 sm:text-2xl"
+          >
+            <span className="h-5 w-1 shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+            {renderInline(title)}
+          </h2>
+        </Reveal>,
+      );
+    } else if (isQuote) {
       const quoteText = lines.map((l) => l.slice(2)).join(" ");
       blocks.push(
         <Reveal key={k} delay={delay}>
           <blockquote
-            className="relative my-6 rounded-r-lg border-l-[3px] py-1 pl-5 font-quicksand text-xl font-bold leading-snug text-foreground sm:text-2xl"
+            className="relative my-6 rounded-r-lg border-l-[3px] py-1 pl-5 font-sans text-xl font-bold leading-snug text-foreground sm:text-2xl"
             style={{ borderColor: accent }}
           >
             {renderInline(quoteText)}
@@ -71,7 +118,7 @@ function renderParagraphs(text: string, accent: string, state: { key: number; le
             {lines.map((l, j) => (
               <li
                 key={j}
-                className="group flex items-start gap-2.5 rounded-lg px-2.5 py-2 font-quicksand text-[15px] font-medium leading-relaxed text-muted transition-colors hover:bg-white/[0.04] hover:text-foreground"
+                className="group flex items-start gap-2.5 rounded-lg px-2.5 py-2 font-sans text-[15px] font-medium leading-relaxed text-muted transition-colors hover:bg-white/[0.04] hover:text-foreground"
               >
                 <ArrowRight
                   className="mt-[3px] h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
@@ -91,8 +138,8 @@ function renderParagraphs(text: string, accent: string, state: { key: number; le
           <p
             className={
               isLead
-                ? "mt-1 font-quicksand text-lg font-medium leading-relaxed text-foreground/90 sm:text-xl"
-                : "mt-4 font-quicksand text-[15px] font-medium leading-relaxed text-muted first:mt-0"
+                ? "mt-1 font-sans text-lg font-medium leading-relaxed text-foreground/90 sm:text-xl"
+                : "mt-4 font-sans text-[15px] font-medium leading-relaxed text-muted first:mt-0"
             }
           >
             {renderInline(para)}
@@ -161,7 +208,7 @@ function NoteCallout({ text, accent, delay }: { text: string; accent: string; de
         style={{ borderColor: `${accent}40`, backgroundColor: `${accent}14` }}
       >
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0" style={{ color: accent }} />
-        <p className="font-quicksand text-[15px] font-medium leading-relaxed text-foreground/90">
+        <p className="font-sans text-[15px] font-medium leading-relaxed text-foreground/90">
           {renderInline(text.trim())}
         </p>
       </div>

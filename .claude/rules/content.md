@@ -40,6 +40,7 @@ Adding an entry is enough: the `/courses` grid and `/courses/[slug]` pages read 
 - A lesson with only an `id` and `title` shows the "coming soon" placeholder. That is fine for unfinished lessons; do not invent filler content.
 - `content` is a template string in the lightweight markdown rendered by `src/lib/lesson-content.tsx`:
   - Blank-line-separated paragraphs. The first paragraph renders larger as the hook line, so make it a strong one-sentence opener.
+  - A lone `## Title` line makes a section heading. Headings also feed the "In this lesson" chips and are anchors for them, so keep them short. The reading time is computed from the text, so lessons need no extra metadata.
   - `- ` lines make a bullet list.
   - `> ` lines make a pull-quote.
   - Triple-backtick fences with a language make a terminal-style code block.
@@ -66,6 +67,16 @@ By the end of this module you will understand the concepts underneath the syntax
 \`\`\``,
 }
 ```
+
+## Lesson voice
+
+- Address the learner as "you", in short sentences.
+- The hook says what the learner will be able to do by the end ("By the end of this lesson you'll be able to…"), not a definition.
+- Explain a term the first time it appears, in a few words, then use it freely.
+- Split a lesson into `## ` sections of one to three short paragraphs. Use bullets for lists of three or more items.
+- At most one `note` callout per lesson, for a real gotcha or a "why it matters", not a summary.
+- Avoid em-dashes and filler. Use a colon or a new sentence instead.
+- For a concept that is invisible in a terminal (isolation, replacement, flow), add a small diagram component in `src/components/LessonDiagrams.tsx` and render it in `extra` before any `<Terminal>`.
 
 ## Quizzes
 

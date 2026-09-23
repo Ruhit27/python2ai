@@ -6,7 +6,7 @@ export default function Home() {
         Go from <span className="gradient-text">Python</span> to{" "}
         <span className="gradient-text">AI Engineer</span>
       </h1>
-      <p className="mt-5 max-w-xl font-quicksand text-base font-medium text-muted sm:text-lg">
+      <p className="mt-5 max-w-xl font-sans text-base font-medium text-muted sm:text-lg">
         SDKs, FastAPI, local models, agent harnesses, and Claude Code — the practical
         path from writing scripts to shipping AI systems.
       </p>
