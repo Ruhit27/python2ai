@@ -48,7 +48,7 @@ export default async function CheatsheetPage({
             <span className="gradient-text">{sheet.title}</span>
           </h1>
         </div>
-        <p className="mt-3 font-quicksand text-sm font-medium text-muted">{sheet.subtitle}</p>
+        <p className="mt-3 font-sans text-sm font-medium text-muted">{sheet.subtitle}</p>
 
         <div className="mt-6 overflow-x-auto rounded-2xl border border-border">
           <table className="w-full min-w-[560px] border-collapse text-left text-sm">

@@ -25,10 +25,9 @@
   --color-accent-to: var(--accent-to);
   --color-accent-pro: var(--accent-pro);
   --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), system-ui, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-bowlby-one-sc);
-  --font-quicksand: var(--font-quicksand);
 }
 
 html {
@@ -38,7 +37,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .gradient-text {

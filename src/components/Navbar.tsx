@@ -35,7 +35,7 @@ export default function Navbar() {
         <div className="hidden items-center justify-self-end md:flex">
           <Link
             href="/login"
-            className="rounded-full border border-border px-4 py-1.5 font-quicksand text-sm font-bold text-foreground transition-colors hover:border-accent-via/60 hover:bg-surface"
+            className="rounded-full border border-border px-4 py-1.5 font-sans text-sm font-bold text-foreground transition-colors hover:border-accent-via/60 hover:bg-surface"
           >
             Login
           </Link>
@@ -84,7 +84,7 @@ export default function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="block rounded-md px-2 py-2.5 font-quicksand text-sm font-bold text-foreground hover:bg-surface"
+                className="block rounded-md px-2 py-2.5 font-sans text-sm font-bold text-foreground hover:bg-surface"
               >
                 Login
               </Link>

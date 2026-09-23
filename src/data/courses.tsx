@@ -10,6 +10,7 @@ import {
 } from "@/components/icons/BrandIcons";
 import { AnimatedSpan, Terminal, TypingAnimation } from "@/components/ui/terminal";
 import Quiz from "@/components/Quiz";
+import { UvDiagram, VenvDiagram } from "@/components/LessonDiagrams";
 import { pythonIntroQuiz } from "@/data/python-quiz";
 
 export type Lesson = {
@@ -19,6 +20,7 @@ export type Lesson = {
   /**
    * Lightweight markdown, rendered by `renderLessonContent`:
    * - blank-line-separated paragraphs (the first one renders as a larger hook line)
+   * - a lone "## " line becomes a section heading (also feeds the "In this lesson" chips)
    * - "- " lines become a bullet list
    * - "> " lines become a pull-quote
    * - ```lang fences become a terminal-style code block
@@ -64,35 +66,49 @@ export const COURSES: Course[] = [
           {
             id: "overview-of-python",
             title: "Overview of Python",
-            content: `Programming is the practice of writing precise, step-by-step instructions that a computer can execute. Every app, script, and AI system you'll build in this course comes down to the same idea: take data in, transform it, produce an output.
+            content: `By the end of this lesson you'll know why Python became the default language for AI, and what this course will teach you to do with it.
 
-> Python reads close to plain English — you spend your energy solving the problem, not fighting the syntax.
+## What programming is
 
-It doesn't force you to manage low-level details like memory, and it has a massive ecosystem of libraries — which is why it became the default language for data science, automation, and AI.
+Programming means writing precise, step-by-step instructions that a computer can follow. Every app, script, and AI system you'll build here comes down to the same loop: take data in, transform it, produce an output.
+
+## Why Python
+
+> Python reads close to plain English, so you spend your energy on the problem, not the syntax.
 
 - Readable syntax that stays close to how you'd describe the logic out loud
-- No compilation step — you run code and see results immediately
+- No compilation step: you run code and see results immediately
+- No low-level details like memory to manage
+- A massive library ecosystem, which is why it became the default for data science, automation, and AI
 
 \`\`\`note
-By the end of this module, you won't just know Python syntax — you'll understand the programming concepts underneath it (variables, control flow, functions, data structures) that transfer to every other language you pick up afterward.
+By the end of this module you'll know more than Python syntax. You'll understand the concepts underneath it (variables, control flow, functions, data structures), and those carry over to every other language you pick up.
 \`\`\``,
           },
           {
             id: "installing-python-and-an-ide",
             title: "Installing Python and an IDE",
-            content: `Before writing any code, you need two things installed: Python itself, and an editor to write it in.
+            content: `By the end of this lesson you'll have Python and an editor installed, ready to run your first script.
 
-Install Python. On macOS and Linux, a Python 3 binary is often preinstalled, but it's better to manage your own version with a tool like \`uv\` or \`pyenv\` rather than relying on the system install. On Windows, download the installer from python.org and check "Add Python to PATH" during setup.
+## Install Python
+
+On macOS and Linux a Python 3 is often preinstalled, but it's better to manage your own version with a tool like \`uv\` or \`pyenv\` than to rely on the system one. On Windows, download the installer from python.org and tick "Add Python to PATH" during setup.
+
+Check that it worked by running this in a terminal (the text window where you type commands):
 
 \`\`\`bash
 python3 --version
 \`\`\`
 
-If that prints a version number of 3.10 or higher, you're set.
+If it prints 3.10 or higher, you're set.
 
-Pick an editor. Visual Studio Code (free) is the most common choice — install the official Python extension for autocomplete, linting, and a built-in terminal. Any editor works, but VS Code is what the rest of this course assumes.
+## Pick an editor
 
-Once Python and your editor are installed, open a terminal inside your project folder — that's where you'll run every script in this course.`,
+Visual Studio Code is free and the most common choice. Install the official Python extension for autocomplete, linting (flagging likely mistakes as you type), and a built-in terminal. Any editor works, but the rest of this course assumes VS Code.
+
+## Open your project folder
+
+Once both are installed, open a terminal inside your project folder. That's where you'll run every script in this course.`,
             extra: (
               <Terminal className="max-w-full">
                 <TypingAnimation>&gt; python3 --version</TypingAnimation>
@@ -110,42 +126,59 @@ Once Python and your editor are installed, open a terminal inside your project f
           {
             id: "virtual-environments",
             title: "Virtual Environments (venv)",
-            content: `Every Python project you build will eventually need third-party packages — and different projects often need different, conflicting versions of the same package. A virtual environment gives each project its own isolated set of installed packages, so they never collide.
+            content: `By the end of this lesson you'll be able to give each project its own set of packages, so they never collide.
 
-Python ships with a built-in tool for this: the \`venv\` module. No extra install required.
+## The problem
+
+Sooner or later every project needs third-party packages: code other people wrote, installed with \`pip\`. Different projects often need conflicting versions of the same package.
+
+A virtual environment gives each project its own isolated set of installed packages. Python ships with a built-in tool for this, the \`venv\` module, so there's nothing extra to install.
+
+## Create and activate one
 
 \`\`\`bash
 python3 -m venv .venv
 source .venv/bin/activate
 \`\`\`
 
-On Windows, activate with \`.venv\\Scripts\\activate\` instead. Once active, your terminal prompt shows the environment name, and anything you \`pip install\` from here only affects this project.
+On Windows, activate with \`.venv\\Scripts\\activate\` instead. Once it's active, your terminal prompt shows the environment name, and anything you \`pip install\` only affects this project.
 
-- One virtual environment per project — never share one across projects
+## Rules of thumb
+
+- One virtual environment per project. Never share one across projects
 - Add \`.venv/\` to your \`.gitignore\`; it should never be committed
 - Run \`deactivate\` to leave the environment when you're done
 
 \`\`\`note
-If you ever see "module not found" errors that seem impossible, check whether you actually activated the right virtual environment first — it's the most common gotcha.
+If you hit a "module not found" error that seems impossible, check first that you activated the right virtual environment. It's the most common gotcha.
 \`\`\``,
             extra: (
-              <Terminal className="max-w-full">
-                <TypingAnimation>&gt; python3 -m venv .venv</TypingAnimation>
-                <TypingAnimation>&gt; source .venv/bin/activate</TypingAnimation>
-                <AnimatedSpan className="text-green-500">✔ (.venv) environment active</AnimatedSpan>
-                <TypingAnimation>&gt; pip install requests</TypingAnimation>
-                <AnimatedSpan className="text-muted-foreground">
-                  Installed requests-2.32.3 into .venv
-                </AnimatedSpan>
-              </Terminal>
+              <>
+                <VenvDiagram accent="#5B9BD5" />
+                <Terminal className="max-w-full">
+                  <TypingAnimation>&gt; python3 -m venv .venv</TypingAnimation>
+                  <TypingAnimation>&gt; source .venv/bin/activate</TypingAnimation>
+                  <AnimatedSpan className="text-green-500">✔ (.venv) environment active</AnimatedSpan>
+                  <TypingAnimation>&gt; pip install requests</TypingAnimation>
+                  <AnimatedSpan className="text-muted-foreground">
+                    Installed requests-2.32.3 into .venv
+                  </AnimatedSpan>
+                </Terminal>
+              </>
             ),
           },
           {
             id: "managing-projects-with-uv",
             title: "Managing Projects with uv",
-            content: `\`uv\` is a modern, extremely fast replacement for \`pip\`, \`venv\`, and \`pyenv\` — built in Rust by the team behind Ruff. It handles installing Python itself, creating virtual environments, and managing dependencies, all through one tool.
+            content: `By the end of this lesson you'll be able to start a project, add packages, and run code with a single tool.
 
-> uv does in milliseconds what pip and venv together take seconds to do — and it manages your Python version too.
+> uv does in milliseconds what pip and venv together take seconds to do, and it manages your Python version too.
+
+## What uv is
+
+\`uv\` is a modern, extremely fast replacement for \`pip\`, \`venv\`, and \`pyenv\`, built in Rust by the team behind Ruff. One tool installs Python itself, creates virtual environments, and manages dependencies.
+
+## Your first uv project
 
 \`\`\`bash
 uv init my-project
@@ -154,32 +187,41 @@ uv add requests
 uv run main.py
 \`\`\`
 
-\`uv add\` installs a package and writes it to a \`pyproject.toml\` lockfile automatically — no separate \`requirements.txt\` to keep in sync by hand. \`uv run\` executes your script inside the project's virtual environment without you ever having to activate it manually.
+\`uv add\` installs a package and records it in \`pyproject.toml\` (with the exact versions pinned in \`uv.lock\`), so there's no separate \`requirements.txt\` to keep in sync by hand. \`uv run\` executes your script inside the project's virtual environment, and you never have to activate it manually.
 
-- \`uv python install 3.12\` — installs a specific Python version for you
-- \`uv add <package>\` — adds and locks a dependency
-- \`uv run <script>\` — runs a script inside the project's environment automatically
+## Commands to remember
+
+- \`uv python install 3.12\`: installs a specific Python version for you
+- \`uv add <package>\`: adds and locks a dependency
+- \`uv run <script>\`: runs a script inside the project's environment automatically
 
 \`\`\`note
-You don't have to choose between venv and uv forever — venv is worth understanding because it's what uv (and most tooling) uses under the hood. Once you're comfortable with both, uv is the faster day-to-day choice for new projects.
+You don't have to pick between venv and uv forever. venv is worth understanding because uv and most other tooling use it under the hood. Once you're comfortable with both, uv is the faster day-to-day choice for new projects.
 \`\`\``,
             extra: (
-              <Terminal className="max-w-full">
-                <TypingAnimation>&gt; uv init my-project</TypingAnimation>
-                <AnimatedSpan className="text-green-500">✔ Initialized project `my-project`</AnimatedSpan>
-                <TypingAnimation>&gt; uv add requests</TypingAnimation>
-                <AnimatedSpan className="text-green-500">✔ Added requests==2.32.3</AnimatedSpan>
-                <TypingAnimation>&gt; uv run main.py</TypingAnimation>
-                <AnimatedSpan className="text-muted-foreground">
-                  Running in .venv — no activation needed
-                </AnimatedSpan>
-              </Terminal>
+              <>
+                <UvDiagram accent="#5B9BD5" />
+                <Terminal className="max-w-full">
+                  <TypingAnimation>&gt; uv init my-project</TypingAnimation>
+                  <AnimatedSpan className="text-green-500">✔ Initialized project `my-project`</AnimatedSpan>
+                  <TypingAnimation>&gt; uv add requests</TypingAnimation>
+                  <AnimatedSpan className="text-green-500">✔ Added requests==2.32.3</AnimatedSpan>
+                  <TypingAnimation>&gt; uv run main.py</TypingAnimation>
+                  <AnimatedSpan className="text-muted-foreground">
+                    Running in .venv — no activation needed
+                  </AnimatedSpan>
+                </Terminal>
+              </>
             ),
           },
           {
             id: "basic-syntax-and-data-types",
             title: "Basic syntax and data types",
-            content: `Python uses indentation, not curly braces, to define blocks of code. This isn't just a style choice — inconsistent indentation is a syntax error in Python, so get comfortable with it early.
+            content: `By the end of this lesson you'll be able to read basic Python: how blocks are marked, how variables work, and the core data types.
+
+## Indentation
+
+Python uses indentation, not curly braces, to define blocks of code. That's more than a style choice: inconsistent indentation is a syntax error, so get comfortable with it early.
 
 \`\`\`python
 name = "Ada"
@@ -191,15 +233,21 @@ else:
     print(f"{name} is a minor")
 \`\`\`
 
-A variable in Python doesn't need a declared type — it just points to a value, and the type is inferred from whatever you assign to it:
+## Variables and types
 
-- \`int\` and \`float\` — whole and decimal numbers (\`age = 28\`, \`price = 9.99\`)
-- \`str\` — text, wrapped in quotes (\`name = "Ada"\`)
-- \`bool\` — \`True\` or \`False\`
-- \`list\` — an ordered, changeable collection (\`scores = [90, 85, 77]\`)
-- \`dict\` — key-value pairs (\`user = {"name": "Ada", "age": 28}\`)
+A variable doesn't need a declared type. It just points to a value, and Python infers the type from whatever you assign. The ones you'll use most:
 
-You can check any value's type with the built-in \`type()\` function — \`type(age)\` returns \`<class 'int'>\`. Python is dynamically typed, meaning a variable can be reassigned to a different type later, which is convenient but means you're responsible for keeping track of what a variable holds.`,
+- \`int\` and \`float\`: whole and decimal numbers (\`age = 28\`, \`price = 9.99\`)
+- \`str\`: text, wrapped in quotes (\`name = "Ada"\`)
+- \`bool\`: \`True\` or \`False\`
+- \`list\`: an ordered, changeable collection (\`scores = [90, 85, 77]\`)
+- \`dict\`: key-value pairs (\`user = {"name": "Ada", "age": 28}\`)
+
+## Checking a type
+
+Check any value's type with the built-in \`type()\` function: \`type(age)\` returns \`<class 'int'>\`.
+
+Python is dynamically typed, so a variable can be reassigned to a different type later. That's convenient, but it means you're responsible for keeping track of what a variable holds.`,
             extra: (
               <Terminal className="max-w-full">
                 <TypingAnimation>&gt; python3 main.py</TypingAnimation>
@@ -220,7 +268,7 @@ You can check any value's type with the built-in \`type()\` function — \`type(
           {
             id: "python-basics-quiz",
             title: "Python Basics Quiz",
-            content: `Let's see what stuck. 10 questions covering everything from this module — Python's philosophy, installing your toolchain, virtual environments, uv, and basic syntax.`,
+            content: `Let's see what stuck. Ten questions cover this whole module: Python's philosophy, your toolchain, virtual environments, uv, and basic syntax.`,
             extra: <Quiz questions={pythonIntroQuiz} accent="#5B9BD5" title="Python Basics Quiz" />,
           },
         ],

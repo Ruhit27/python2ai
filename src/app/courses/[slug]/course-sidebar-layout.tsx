@@ -14,7 +14,7 @@ import {
   Sidebar001Item,
 } from "@/components/ui/sidebar-001";
 import { getCourse } from "@/data/courses";
-import { renderLessonContent } from "@/lib/lesson-content";
+import { getLessonMeta, headingId, renderLessonContent } from "@/lib/lesson-content";
 import { useCourseProgress } from "@/lib/use-course-progress";
 
 type Burst = { key: number; intensity: "small" | "large" };
@@ -28,6 +28,7 @@ export default function CourseSidebarLayout({ slug }: { slug: string }) {
   const [burst, setBurst] = React.useState<Burst | null>(null);
   const [showComplete, setShowComplete] = React.useState(false);
   const advanceTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const lessons = React.useMemo(
     () => course?.modules.flatMap((m) => m.lessons) ?? [],
@@ -64,6 +65,17 @@ export default function CourseSidebarLayout({ slug }: { slug: string }) {
   const activeLesson = activeModule?.lessons.find((l) => l.id === active);
   const isActiveDone = hydrated && done.has(active);
   const animateBar = event !== null && !reduceMotion;
+  const meta = activeLesson?.content ? getLessonMeta(activeLesson.content) : null;
+  const nextLesson = lessons[lessons.findIndex((l) => l.id === active) + 1];
+  const moduleDoneCount = activeModule
+    ? activeModule.lessons.filter((l) => hydrated && done.has(l.id)).length
+    : 0;
+
+  const scrollToHeading = (title: string) => {
+    document
+      .getElementById(headingId(title))
+      ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  };
 
   const selectLesson = (id: string) => {
     cancelAdvance();
@@ -199,7 +211,7 @@ export default function CourseSidebarLayout({ slug }: { slug: string }) {
         )}
       </motion.button>
 
-      <div className="relative flex-1 overflow-y-auto no-scrollbar">
+      <div ref={scrollRef} className="relative flex-1 overflow-y-auto no-scrollbar">
         <div className="sticky top-0 z-20 flex items-center gap-3 bg-background/80 px-6 py-3 backdrop-blur sm:px-10">
           <div
             className="flex flex-1 gap-1"
@@ -252,6 +264,7 @@ export default function CourseSidebarLayout({ slug }: { slug: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
+            onAnimationStart={() => scrollRef.current?.scrollTo({ top: 0 })}
             className="relative mx-auto max-w-2xl px-6 py-14 sm:px-10"
           >
             <p className="mb-4 font-mono text-xs text-muted/70">
@@ -316,16 +329,55 @@ export default function CourseSidebarLayout({ slug }: { slug: string }) {
 
             {activeLesson?.content ? (
               <>
+                {meta && meta.headings.length > 0 && (
+                  <nav aria-label="In this lesson" className="mt-5 flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs text-muted/70">{meta.minutes} min read</span>
+                    <span className="text-muted/40">·</span>
+                    {meta.headings.map((heading) => (
+                      <button
+                        key={heading}
+                        type="button"
+                        onClick={() => scrollToHeading(heading)}
+                        className="rounded-full border px-3 py-1 font-sans text-xs font-medium transition-colors hover:text-foreground"
+                        style={{
+                          borderColor: `${course.accent}40`,
+                          color: course.accent,
+                          backgroundColor: `${course.accent}14`,
+                        }}
+                      >
+                        {heading}
+                      </button>
+                    ))}
+                  </nav>
+                )}
                 <div className="mt-2">
                   {renderLessonContent(activeLesson.content, course.accent)}
                 </div>
                 {activeLesson.extra && (
                   <div className="mt-2">{activeLesson.extra}</div>
                 )}
+                {activeModule && (
+                  <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
+                    <p className="font-mono text-xs text-muted/70">
+                      {moduleDoneCount} of {activeModule.lessons.length} done in {activeModule.title}
+                    </p>
+                    {(!isActiveDone || nextLesson) && (
+                      <button
+                        type="button"
+                        onClick={isActiveDone ? () => selectLesson(nextLesson.id) : handleToggle}
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 font-sans text-sm font-semibold text-black transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: course.accent }}
+                      >
+                        {isActiveDone ? "Next lesson" : nextLesson ? "Mark as done and continue" : "Mark as done"}
+                        <ChevronRight className="size-4" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <>
-                <p className="mt-4 max-w-xl font-quicksand text-base font-medium text-muted">
+                <p className="mt-4 max-w-xl font-sans text-base font-medium text-muted">
                   {course.description}
                 </p>
 
@@ -386,7 +438,7 @@ export default function CourseSidebarLayout({ slug }: { slug: string }) {
               <h2 className="font-heading text-2xl tracking-tight">
                 Course complete
               </h2>
-              <p className="mt-2 font-quicksand text-sm font-medium text-muted">
+              <p className="mt-2 font-sans text-sm font-medium text-muted">
                 You finished all {lessons.length} lessons of {course.title}.
               </p>
               <div className="mt-6 flex items-center justify-center gap-3">
