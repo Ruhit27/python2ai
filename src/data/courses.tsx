@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode, SVGProps } from "react";
+import { CodeXml } from "lucide-react";
 import {
   ClaudeIcon,
   FastApiIcon,
@@ -12,6 +13,8 @@ import Quiz from "@/components/Quiz";
 import { pythonIntroQuiz } from "@/data/python-quiz";
 
 export type Lesson = {
+  /** Stable slug, unique within its course. Progress is saved against it, so never change it once published. */
+  id: string;
   title: string;
   /**
    * Lightweight markdown, rendered by `renderLessonContent`:
@@ -59,6 +62,7 @@ export const COURSES: Course[] = [
         title: "Introduction to Python",
         lessons: [
           {
+            id: "overview-of-python",
             title: "Overview of Python",
             content: `Programming is the practice of writing precise, step-by-step instructions that a computer can execute. Every app, script, and AI system you'll build in this course comes down to the same idea: take data in, transform it, produce an output.
 
@@ -74,6 +78,7 @@ By the end of this module, you won't just know Python syntax — you'll understa
 \`\`\``,
           },
           {
+            id: "installing-python-and-an-ide",
             title: "Installing Python and an IDE",
             content: `Before writing any code, you need two things installed: Python itself, and an editor to write it in.
 
@@ -103,6 +108,7 @@ Once Python and your editor are installed, open a terminal inside your project f
             ),
           },
           {
+            id: "virtual-environments",
             title: "Virtual Environments (venv)",
             content: `Every Python project you build will eventually need third-party packages — and different projects often need different, conflicting versions of the same package. A virtual environment gives each project its own isolated set of installed packages, so they never collide.
 
@@ -135,6 +141,7 @@ If you ever see "module not found" errors that seem impossible, check whether yo
             ),
           },
           {
+            id: "managing-projects-with-uv",
             title: "Managing Projects with uv",
             content: `\`uv\` is a modern, extremely fast replacement for \`pip\`, \`venv\`, and \`pyenv\` — built in Rust by the team behind Ruff. It handles installing Python itself, creating virtual environments, and managing dependencies, all through one tool.
 
@@ -170,6 +177,7 @@ You don't have to choose between venv and uv forever — venv is worth understan
             ),
           },
           {
+            id: "basic-syntax-and-data-types",
             title: "Basic syntax and data types",
             content: `Python uses indentation, not curly braces, to define blocks of code. This isn't just a style choice — inconsistent indentation is a syntax error in Python, so get comfortable with it early.
 
@@ -210,6 +218,7 @@ You can check any value's type with the built-in \`type()\` function — \`type(
         title: "Checkpoint",
         lessons: [
           {
+            id: "python-basics-quiz",
             title: "Python Basics Quiz",
             content: `Let's see what stuck. 10 questions covering everything from this module — Python's philosophy, installing your toolchain, virtual environments, uv, and basic syntax.`,
             extra: <Quiz questions={pythonIntroQuiz} accent="#5B9BD5" title="Python Basics Quiz" />,
@@ -219,38 +228,38 @@ You can check any value's type with the built-in \`type()\` function — \`type(
       {
         title: "Control Flow and Functions",
         lessons: [
-          { title: "Conditional statements (if, else, elif)" },
-          { title: "Loops (for, while)" },
-          { title: "Functions and modular programming" },
+          { id: "conditional-statements", title: "Conditional statements (if, else, elif)" },
+          { id: "loops", title: "Loops (for, while)" },
+          { id: "functions-and-modular-programming", title: "Functions and modular programming" },
         ],
       },
       {
         title: "Data Structures",
         lessons: [
-          { title: "Lists, tuples, and dictionaries" },
-          { title: "String manipulation" },
-          { title: "Basic input/output" },
+          { id: "lists-tuples-and-dictionaries", title: "Lists, tuples, and dictionaries" },
+          { id: "string-manipulation", title: "String manipulation" },
+          { id: "basic-input-output", title: "Basic input/output" },
         ],
       },
       {
         title: "File Handling",
         lessons: [
-          { title: "Reading and writing files" },
-          { title: "Working with different file formats (text, CSV)" },
+          { id: "reading-and-writing-files", title: "Reading and writing files" },
+          { id: "working-with-different-file-formats", title: "Working with different file formats (text, CSV)" },
         ],
       },
       {
         title: "Exception Handling",
         lessons: [
-          { title: "Handling errors and exceptions" },
-          { title: "Using try-except blocks" },
+          { id: "handling-errors-and-exceptions", title: "Handling errors and exceptions" },
+          { id: "using-try-except-blocks", title: "Using try-except blocks" },
         ],
       },
       {
         title: "Introduction to Libraries",
         lessons: [
-          { title: "Overview of standard libraries (e.g., math, random)" },
-          { title: "Introduction to external libraries (e.g., NumPy)" },
+          { id: "overview-of-standard-libraries", title: "Overview of standard libraries (e.g., math, random)" },
+          { id: "introduction-to-external-libraries", title: "Introduction to external libraries (e.g., NumPy)" },
         ],
       },
     ],
@@ -266,29 +275,29 @@ You can check any value's type with the built-in \`type()\` function — \`type(
     modules: [
       {
         title: "Getting Started",
-        lessons: [{ title: "Why FastAPI" }, { title: "Project setup" }, { title: "Your first endpoint" }],
+        lessons: [{ id: "why-fastapi", title: "Why FastAPI" }, { id: "project-setup", title: "Project setup" }, { id: "your-first-endpoint", title: "Your first endpoint" }],
       },
       {
         title: "Core Concepts",
         lessons: [
-          { title: "Path & query params" },
-          { title: "Pydantic models" },
-          { title: "Request validation" },
-          { title: "Dependency injection" },
+          { id: "path-and-query-params", title: "Path & query params" },
+          { id: "pydantic-models", title: "Pydantic models" },
+          { id: "request-validation", title: "Request validation" },
+          { id: "dependency-injection", title: "Dependency injection" },
         ],
       },
       {
         title: "Building Real APIs",
         lessons: [
-          { title: "Async routes" },
-          { title: "Streaming responses" },
-          { title: "Auth & middleware" },
-          { title: "Background tasks" },
+          { id: "async-routes", title: "Async routes" },
+          { id: "streaming-responses", title: "Streaming responses" },
+          { id: "auth-and-middleware", title: "Auth & middleware" },
+          { id: "background-tasks", title: "Background tasks" },
         ],
       },
       {
         title: "Shipping",
-        lessons: [{ title: "Testing with pytest" }, { title: "Deploying to production" }],
+        lessons: [{ id: "testing-with-pytest", title: "Testing with pytest" }, { id: "deploying-to-production", title: "Deploying to production" }],
       },
     ],
   },
@@ -304,31 +313,31 @@ You can check any value's type with the built-in \`type()\` function — \`type(
       {
         title: "Getting Started",
         lessons: [
-          { title: "Installing Claude Code" },
-          { title: "Your first session" },
-          { title: "The permission model" },
+          { id: "installing-claude-code", title: "Installing Claude Code" },
+          { id: "your-first-session", title: "Your first session" },
+          { id: "the-permission-model", title: "The permission model" },
         ],
       },
       {
         title: "Working with the Agent",
         lessons: [
-          { title: "Reading & editing code" },
-          { title: "Running commands safely" },
-          { title: "Subagents" },
-          { title: "Plan mode" },
+          { id: "reading-and-editing-code", title: "Reading & editing code" },
+          { id: "running-commands-safely", title: "Running commands safely" },
+          { id: "subagents", title: "Subagents" },
+          { id: "plan-mode", title: "Plan mode" },
         ],
       },
       {
         title: "Real Workflows",
         lessons: [
-          { title: "Debugging with Claude Code" },
-          { title: "Refactoring large codebases" },
-          { title: "Writing tests" },
+          { id: "debugging-with-claude-code", title: "Debugging with Claude Code" },
+          { id: "refactoring-large-codebases", title: "Refactoring large codebases" },
+          { id: "writing-tests", title: "Writing tests" },
         ],
       },
       {
         title: "Going Further",
-        lessons: [{ title: "Custom skills" }, { title: "CI & automation" }],
+        lessons: [{ id: "custom-skills", title: "Custom skills" }, { id: "ci-and-automation", title: "CI & automation" }],
       },
     ],
   },
@@ -343,28 +352,28 @@ You can check any value's type with the built-in \`type()\` function — \`type(
     modules: [
       {
         title: "Getting Started",
-        lessons: [{ title: "What makes an agent" }, { title: "Setting up LangChain" }],
+        lessons: [{ id: "what-makes-an-agent", title: "What makes an agent" }, { id: "setting-up-langchain", title: "Setting up LangChain" }],
       },
       {
         title: "Core Concepts",
         lessons: [
-          { title: "Tool calling" },
-          { title: "Planning & reasoning loops" },
-          { title: "Memory" },
-          { title: "State machines" },
+          { id: "tool-calling", title: "Tool calling" },
+          { id: "planning-and-reasoning-loops", title: "Planning & reasoning loops" },
+          { id: "memory", title: "Memory" },
+          { id: "state-machines", title: "State machines" },
         ],
       },
       {
         title: "Building Agents",
         lessons: [
-          { title: "Multi-step agents" },
-          { title: "Multi-agent systems" },
-          { title: "Error recovery" },
+          { id: "multi-step-agents", title: "Multi-step agents" },
+          { id: "multi-agent-systems", title: "Multi-agent systems" },
+          { id: "error-recovery", title: "Error recovery" },
         ],
       },
       {
         title: "Production",
-        lessons: [{ title: "Evaluation" }, { title: "Observability" }],
+        lessons: [{ id: "evaluation", title: "Evaluation" }, { id: "observability", title: "Observability" }],
       },
     ],
   },
@@ -379,22 +388,22 @@ You can check any value's type with the built-in \`type()\` function — \`type(
     modules: [
       {
         title: "Getting Started",
-        lessons: [{ title: "Installing Ollama" }, { title: "Pulling your first model" }],
+        lessons: [{ id: "installing-ollama", title: "Installing Ollama" }, { id: "pulling-your-first-model", title: "Pulling your first model" }],
       },
       {
         title: "Core Concepts",
         lessons: [
-          { title: "Quantization basics" },
-          { title: "GGUF & model formats" },
-          { title: "Hardware requirements" },
+          { id: "quantization-basics", title: "Quantization basics" },
+          { id: "gguf-and-model-formats", title: "GGUF & model formats" },
+          { id: "hardware-requirements", title: "Hardware requirements" },
         ],
       },
       {
         title: "Running Models",
         lessons: [
-          { title: "Serving a local API" },
-          { title: "Fine-tuning basics" },
-          { title: "Benchmarking" },
+          { id: "serving-a-local-api", title: "Serving a local API" },
+          { id: "fine-tuning-basics", title: "Fine-tuning basics" },
+          { id: "benchmarking", title: "Benchmarking" },
         ],
       },
     ],
@@ -410,23 +419,80 @@ You can check any value's type with the built-in \`type()\` function — \`type(
     modules: [
       {
         title: "Getting Started",
-        lessons: [{ title: "How LLMs read prompts" }, { title: "Zero-shot vs few-shot" }],
+        lessons: [{ id: "how-llms-read-prompts", title: "How LLMs read prompts" }, { id: "zero-shot-vs-few-shot", title: "Zero-shot vs few-shot" }],
       },
       {
         title: "Core Techniques",
         lessons: [
-          { title: "Chain of thought" },
-          { title: "System prompts" },
-          { title: "Structured output" },
+          { id: "chain-of-thought", title: "Chain of thought" },
+          { id: "system-prompts", title: "System prompts" },
+          { id: "structured-output", title: "Structured output" },
         ],
       },
       {
         title: "Reliability",
-        lessons: [{ title: "Testing prompts" }, { title: "Evals" }, { title: "Versioning prompts" }],
+        lessons: [{ id: "testing-prompts", title: "Testing prompts" }, { id: "evals", title: "Evals" }, { id: "versioning-prompts", title: "Versioning prompts" }],
+      },
+    ],
+  },
+  {
+    slug: "coding-with-ai",
+    title: "Coding with AI",
+    description: "Use AI assistants to plan, write, review, and ship code faster without giving up quality.",
+    bg: "bg-[#60A5FA]",
+    icon: CodeXml,
+    iconColor: "text-[#60A5FA]",
+    accent: "#60A5FA",
+    modules: [
+      {
+        title: "Getting Started",
+        lessons: [
+          { id: "the-ai-assisted-workflow", title: "The AI-assisted workflow" },
+          { id: "choosing-your-tools", title: "Choosing your tools" },
+          { id: "setting-up-your-editor", title: "Setting up your editor" },
+        ],
+      },
+      {
+        title: "Core Skills",
+        lessons: [
+          { id: "writing-effective-prompts-for-code", title: "Writing effective prompts for code" },
+          { id: "giving-context", title: "Giving context (files, docs, errors)" },
+          { id: "reviewing-ai-generated-code", title: "Reviewing AI-generated code" },
+          { id: "iterating-with-feedback", title: "Iterating with feedback" },
+        ],
+      },
+      {
+        title: "Everyday Workflows",
+        lessons: [
+          { id: "generating-and-refactoring-code", title: "Generating and refactoring code" },
+          { id: "debugging-with-ai", title: "Debugging with AI" },
+          { id: "writing-tests-and-docs", title: "Writing tests and docs" },
+          { id: "learning-unfamiliar-codebases", title: "Learning unfamiliar codebases" },
+        ],
+      },
+      {
+        title: "Working Responsibly",
+        lessons: [
+          { id: "security-and-secrets", title: "Security and secrets" },
+          { id: "spotting-hallucinations", title: "Spotting hallucinations" },
+          { id: "when-not-to-use-ai", title: "When not to use AI" },
+        ],
       },
     ],
   },
 ];
+
+if (process.env.NODE_ENV !== "production") {
+  for (const course of COURSES) {
+    const seen = new Set<string>();
+    for (const lesson of course.modules.flatMap((m) => m.lessons)) {
+      if (seen.has(lesson.id)) {
+        console.error(`Duplicate lesson id "${lesson.id}" in course "${course.slug}"`);
+      }
+      seen.add(lesson.id);
+    }
+  }
+}
 
 export function getCourse(slug: string) {
   return COURSES.find((course) => course.slug === slug);
