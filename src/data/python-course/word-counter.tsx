@@ -11,17 +11,17 @@ export const wordCounterModule: CourseModule = {
 
 ## What you'll build
 
-You give it a filename. It counts the words, finds the five most common, prints a summary, and saves that summary to a file called \`report.txt\`. If the file doesn't exist, it says so instead of crashing. The sample run shows the finished tool.
+You give it a filename. It counts the words, finds the five most common, prints a summary, and saves that summary to \`report.txt\`. If the file doesn't exist, it says so instead of crashing. The sample run shows the finished tool.
 
 ## Set up a test file
 
-Create a file called \`sample.txt\` next to your program with a few sentences in it. To get the same numbers as the sample run, use exactly this line: \`Hello, world! Hello again. The world is big, the world is round.\` Any other text works too, with different counts.
+Create \`sample.txt\` next to your program. To get the exact numbers in the sample run, use this line: \`Hello, world! Hello again. The world is big, the world is round.\` Any other text works too, with different counts.
 
 ## The rough version
 
 \`\`\`python
 filename = input("File to analyze: ")
-text = open(filename).read()
+text = open(filename).read()   # never closed, and crashes if the file is missing
 words = text.split()
 print(len(words), "words")
 \`\`\`
@@ -31,9 +31,9 @@ print(len(words), "words")
 - "Hello," and "hello" count as different words
 - It only reports a total, not which words are common
 - It never saves anything
-- A mistyped filename crashes it, and it never closes the file
+- A mistyped filename crashes it with a raw traceback, and the file is never explicitly closed
 
-This module covers strings, reading and writing files, and error handling.`,
+This module covers strings, files, and error handling: the three things almost every real program does with data that comes from outside itself.`,
       extra: (
         <SampleRun
           steps={[
@@ -50,149 +50,166 @@ This module covers strings, reading and writing files, and error handling.`,
       ),
     },
     {
-      id: "words-string-methods",
+      id: "words-strings",
       title: "Working with strings",
-      content: `By the end of this lesson you'll be able to clean up text so that "Hello," and "hello" become the same word.
+      content: `By the end of this lesson you'll be able to clean up messy text so "Hello," and "hello" count as the same word, and count how often each one shows up.
 
-## Strings have methods
+## Strings have methods too
 
-A method is a function attached to a value, called with a dot. Strings come with dozens. None of them change the original string. They return a new one, so you need to keep the result.
+Like lists, strings come with built-in methods, called with a dot. Unlike list methods such as \`.append()\`, string methods never change the original string: they hand back a new one, so you have to keep the result.
 
 \`\`\`python
 text = "  Hello, World!  "
-clean = text.strip().lower()
-print(clean)
+clean = text.strip().lower()   # each method runs on the result of the one before it
+print(text)    # unchanged: "  Hello, World!  "
+print(clean)   # "hello, world!"
 \`\`\`
 
-## Methods you'll use
+Chaining \`.strip().lower()\` like that reads right to left in effect but left to right on the page: strip the whitespace first, then lowercase what's left.
 
-- \`.lower()\` and \`.upper()\` change the case
-- \`.strip()\` removes whitespace from both ends. Given characters, like \`.strip(".,")\`, it removes those instead
-- \`.split()\` cuts a string into a list of words on whitespace
-- \`.replace("a", "b")\` swaps text
-- \`"-".join(["a", "b"])\` glues a list into one string
+## Methods you'll use here
 
-## Removing punctuation
+\`\`\`python
+text = "  Hello, World!  "
 
-The \`string\` module has a ready-made list of punctuation characters:
+print(text.lower())               # "  hello, world!  "
+print(text.strip())               # "Hello, World!": outer whitespace only
+print(text.strip().split())       # ['Hello,', 'World!']: cuts on whitespace
+print("-".join(["a", "b", "c"]))  # "a-b-c": the reverse of split
+print(text.replace("l", "L"))     # "  HeLLo, WorLd!  "
+\`\`\`
+
+## Stripping punctuation specifically
+
+\`.strip()\` with no arguments removes whitespace. Give it characters instead, and it strips those from both ends:
 
 \`\`\`python
 import string
 
+print(string.punctuation)              # !"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~
 word = "Hello,".lower().strip(string.punctuation)
-print(word)
+print(word)   # "hello": comma's gone, "hello" itself is untouched
 \`\`\`
+
+\`string.punctuation\` is just a string someone already typed out for you, sitting inside the \`string\` module, so you don't have to.
 
 ## Counting with a dictionary
 
-To count how often each word appears, use a dictionary from word to count. \`counts.get(word, 0)\` returns the current count, or 0 for a new word:
+Project 2 used a dictionary to hold facts about one task. Here, the keys are words and the values are counts, which is one of the most common dictionary shapes you'll write.
 
 \`\`\`python
+words = ["the", "cat", "sat", "on", "the", "mat"]
 counts = {}
+
 for word in words:
+    # .get(word, 0) returns the count so far, or 0 the first time we see it:
+    # without this, brand new words would crash with KeyError
     counts[word] = counts.get(word, 0) + 1
+
+print(counts)   # {'the': 2, 'cat': 1, 'sat': 1, 'on': 1, 'mat': 1}
 \`\`\`
 
 ## Try it
 
-Split "the cat and the hat" into words and count them. \`"the"\` should come out as 2.`,
+- Run \`"the cat and the hat".split()\` and predict the list before you check
+- Clean \`"WOW!!"\` down to \`"wow"\` using \`.lower()\` and \`.strip(string.punctuation)\`
+- Count the words in \`["a", "b", "a", "a", "c"]\` by hand, then confirm with the loop above`,
     },
     {
-      id: "words-reading-files",
-      title: "Reading files",
-      content: `By the end of this lesson you'll be able to load the contents of a text file into your program.
+      id: "words-files",
+      title: "Reading and writing files",
+      content: `By the end of this lesson you'll be able to load a file's contents in, and save your program's results back out.
 
-## Opening a file
+## Opening a file safely
 
-Use \`open\` inside a \`with\` block. The block closes the file for you when it ends, even if something goes wrong halfway through.
+Open a file inside a \`with\` block. It closes the file for you automatically when the block ends, even if an error happens partway through, which is easy to forget if you open it by hand.
 
 \`\`\`python
 with open("sample.txt", encoding="utf-8") as file:
     text = file.read()
+# the file is already closed here, even though the code never said so
 \`\`\`
 
-\`encoding="utf-8"\` tells Python how to turn the file's bytes into characters. Include it, or non-English text can come out garbled on some systems.
+\`encoding="utf-8"\` tells Python how to turn the file's raw bytes into characters. Leave it out and text with accents or emoji can come out garbled on some systems. Just always include it.
 
-## Where does the file live?
+## A plain filename is relative to where you ran the command
 
-A plain filename like \`sample.txt\` is looked up in the folder you ran the command from, not the folder your script sits in. That's why we open the terminal in the project folder.
+\`open("sample.txt")\` looks in the folder you launched \`python3\` from, not the folder the \`.py\` file lives in. That's why we open the terminal inside the project folder before running anything.
 
-## Other ways to read
+## Three ways to read
 
-- \`file.read()\` gives the whole file as one string
-- \`file.readlines()\` gives a list with one string per line
-- \`for line in file:\` walks through the lines one at a time, which suits large files
+\`\`\`python
+with open("sample.txt", encoding="utf-8") as file:
+    text = file.read()          # everything, as one string
 
-## Try it
+with open("sample.txt", encoding="utf-8") as file:
+    lines = file.readlines()    # a list, one string per line, newlines kept
 
-Read \`sample.txt\`, then print how many characters, words, and lines it has. Lines are \`text.splitlines()\`.`,
-    },
-    {
-      id: "words-writing-files",
-      title: "Writing files",
-      content: `By the end of this lesson you'll be able to save your program's results to a file.
+with open("sample.txt", encoding="utf-8") as file:
+    for line in file:           # walks the file one line at a time
+        print(line.strip())     # strip() here just drops the trailing newline
+\`\`\`
 
-## Write mode
+\`for line in file\` is the one to reach for on a huge file, since it never loads the whole thing into memory at once. For this project's files, \`.read()\` is simplest and fine.
 
-Pass \`"w"\` as the second argument to \`open\` to write. If the file doesn't exist, Python creates it. If it does exist, Python empties it first.
+## Writing a file
+
+Pass \`"w"\` as a second argument to write instead of read. Python creates the file if it's missing, and empties it first if it already exists, every single time you open it in \`"w"\` mode.
 
 \`\`\`python
 with open("report.txt", "w", encoding="utf-8") as file:
-    file.write("12 words\\n")
+    file.write("12 words\\n")     # write() adds no newline of its own: \\n is you asking for one
     file.write("7 different\\n")
 \`\`\`
 
-\`write\` doesn't add a line break for you. \`\\n\` is the character for one, so include it where you want a new line.
+\`"a"\` (append) is the other common mode: it adds to the end and keeps what was already there, instead of erasing it.
 
-## Other modes
+## Building a report in one write
 
-- \`"r"\` reads. It's the default, and it fails if the file is missing
-- \`"w"\` writes, erasing what was there
-- \`"a"\` appends to the end and keeps what was there
-
-## Building a report
-
-Collect the report lines in a list, join them with a line break, and write once:
+Collect the lines you want in a list, glue them together with \`"\\n".join(...)\`, and write once. It's easier to get right than juggling several \`.write()\` calls:
 
 \`\`\`python
-lines = [f"{len(words)} words", f"{len(counts)} different"]
+lines = ["12 words, 7 different.", "world: 3", "hello: 2"]
 report = "\\n".join(lines)
+
+print(report)
 with open("report.txt", "w", encoding="utf-8") as file:
-    file.write(report + "\\n")
+    file.write(report + "\\n")   # +1 for the final newline join() doesn't add
 \`\`\`
 
 ## Try it
 
-Write three lines of your choice to \`notes.txt\`, run the program twice, and confirm the file has three lines, not six. Then switch to \`"a"\` and run it twice again.`,
+- Write three lines to \`notes.txt\` using \`"w"\` mode, run the file twice, and confirm it still has three lines, not six
+- Switch to \`"a"\` mode and run it twice: now confirm it does grow`,
     },
     {
-      id: "words-handling-errors",
+      id: "words-errors",
       title: "Handling errors",
-      content: `By the end of this lesson you'll be able to make your program respond politely to problems instead of crashing.
+      content: `By the end of this lesson you'll be able to make your program respond to a problem instead of crashing with a wall of red text.
 
-## Errors are normal
+## Errors are normal, not a sign you did something wrong
 
-Files go missing, and players type nonsense. Python signals the problem by raising an exception, and if nothing handles it, the program stops with a traceback. Read a traceback from the bottom: the last line names the error, and the lines above show where.
+Files go missing. Players type nonsense. Python signals a problem by raising an exception, and if nothing catches it, the program stops and prints a traceback. Read a traceback from the bottom up: the last line names the error, the lines above trace where it happened.
 
-## try and except
+## try / except
 
-Put the risky code in \`try\`. If it raises the error you named, Python jumps to \`except\` instead of crashing.
+Put the risky line inside \`try\`. If it raises the exact error named after \`except\`, Python jumps there instead of crashing the program.
 
 \`\`\`python
+filename = "missing.txt"
+
 try:
     with open(filename, encoding="utf-8") as file:
         text = file.read()
 except FileNotFoundError:
-    print(f"Can't find {filename}.")
+    print(f"Can't find {filename}.")   # this runs; the program keeps going
 \`\`\`
 
-## Be specific
+## Name the error you expect
 
-Name the error you expect. A bare \`except:\` catches everything, including your own typos, and hides bugs you'd want to see.
+A bare \`except:\` with nothing after it catches everything, including bugs in your own code and typos in variable names, and hides them the same way it hides a missing file. Name the specific error so real bugs still surface as crashes you can actually see and fix.
 
-## else
-
-An \`else\` block after \`except\` runs only when nothing went wrong. It's the right place for the code that depends on the risky part having worked:
+## else: the part that only runs if nothing went wrong
 
 \`\`\`python
 try:
@@ -200,19 +217,27 @@ try:
 except ValueError:
     print("That's not a number.")
 else:
+    # only reached if the try block didn't raise: number is guaranteed to exist here
     print(number * 2)
 \`\`\`
 
-## Errors you've already met
+Putting the success path in \`else\` rather than after the \`try\` block keeps it separate from the risky part, so you don't accidentally catch an error the success code itself raises.
 
-- \`ValueError\`: \`int("abc")\`
-- \`IndexError\`: an index that's past the end of a list
-- \`KeyError\`: a dictionary key that isn't there
-- \`FileNotFoundError\`: a file that isn't there
+## Errors you've already caused, on purpose, while testing
+
+\`\`\`python
+# int("abc")            -> ValueError
+# [1, 2][5]              -> IndexError
+# {"a": 1}["b"]           -> KeyError
+# open("nope.txt")        -> FileNotFoundError
+\`\`\`
+
+Recognizing the name of an error is most of the work of fixing it; Python is telling you exactly what went wrong, in the last line of the traceback.
 
 ## Try it
 
-Go back to your Guess the Number game and wrap the \`int(input(...))\` in a \`try\` so that typing "abc" prints a message and asks again.`,
+- Go back to Guess the Number and wrap \`int(input(...))\` in \`try\`/\`except ValueError\` so typing letters prints a message and asks again instead of crashing
+- Trigger a \`KeyError\` on purpose with a dictionary you make up, and read the traceback it produces before catching it`,
     },
     {
       id: "words-finish-the-project",
@@ -236,9 +261,10 @@ else:
     counts = {}
     for word in words:
         word = word.strip(string.punctuation)
-        if word:
+        if word:   # skip anything that was pure punctuation, like a lone "-"
             counts[word] = counts.get(word, 0) + 1
 
+    # sort words by their count, highest first, and keep only the top 5
     top = sorted(counts, key=counts.get, reverse=True)[:5]
 
     lines = [f"{len(words)} words, {len(counts)} different."]
@@ -251,21 +277,22 @@ else:
         out.write(report + "\\n")
 \`\`\`
 
-Two lines are new. \`sorted(counts, key=counts.get, reverse=True)\` orders the words by their counts, highest first. \`[:5]\` keeps only the first five.
+Two pieces are new here. \`sorted(counts, key=counts.get, reverse=True)\` sorts the dictionary's keys by looking up each one's count; \`[:5]\` then keeps only the first five of that sorted list.
 
 ## Done when
 
 - Running it on \`sample.txt\` prints the total, the number of different words, and the five most common
 - "Hello," and "hello" count as the same word
-- A mistyped filename prints "Can't find ..." and exits without a traceback
-- \`report.txt\` appears with the same text you saw on screen
-- Running it twice leaves one copy of the report, not two
+- A mistyped filename prints "Can't find ..." with no traceback
+- \`report.txt\` appears with the same text you saw printed
+- Running it twice leaves one copy of the report, not two, because \`"w"\` mode overwrites
+- You can explain why the loop skips a word when \`word\` is empty after stripping punctuation
 
 ## Stretch goals
 
-- Ignore very common words like "the" and "is"
-- Ask how many top words to show
-- Handle an empty file`,
+- Ignore very common words like "the" and "is" by skipping them in the loop
+- Ask how many top words to show instead of hardcoding 5
+- Handle a completely empty file (0 words) without dividing by zero anywhere you add later`,
     },
   ],
 };

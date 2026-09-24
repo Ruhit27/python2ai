@@ -18,12 +18,13 @@ The computer picks a number from 1 to 100. You guess, and it tells you "Too low"
 Here is a first attempt. It runs, but it's missing almost everything.
 
 \`\`\`python
-secret = 42
-guess = int(input("Your guess: "))
+secret = 42  # not random yet, always the same number
+guess = int(input("Your guess: "))  # turn what was typed into a whole number
+
 if guess == secret:
     print("Got it!")
 else:
-    print("Nope.")
+    print("Nope.")  # doesn't say which direction to go
 \`\`\`
 
 Save it as \`guess.py\` and run it. Try a few guesses.
@@ -35,7 +36,7 @@ Save it as \`guess.py\` and run it. Try a few guesses.
 - "Nope" doesn't tell you which direction to go
 - It doesn't count your tries
 
-Each lesson in this module fixes one of these. You'll also learn the ideas behind each fix: variables, input, decisions, and loops.`,
+Each lesson in this module fixes one of these, and goes a bit further than the fix itself: not just how, but why Python behaves this way.`,
       extra: (
         <SampleRun
           steps={[
@@ -52,191 +53,241 @@ Each lesson in this module fixes one of these. You'll also learn the ideas behin
       ),
     },
     {
-      id: "guess-variables-and-types",
-      title: "Variables and types",
-      content: `By the end of this lesson you'll be able to store a value under a name and know what kind of value it is.
+      id: "guess-variables-types-and-io",
+      title: "Variables, types, and talking to the player",
+      content: `By the end of this lesson you'll be able to store values, know what kind of value each one is, and get input from the player.
 
 ## Variables
 
-A variable is a name that points to a value. You create one with \`=\`, which means "store this", not "is equal to".
+A variable is a name that points to a value. \`=\` means "store this", not "is equal to": that trips up almost everyone once.
 
 \`\`\`python
-secret = 42
-attempts = 0
-name = "Ada"
+secret = 42       # int: a whole number
+attempts = 0      # int: starts at zero, we'll count up
+name = "Ada"      # str: text, in quotes
 \`\`\`
 
-You can change what a name points to at any time, and you can use the name anywhere you'd use the value.
+You can point a name at a new value at any time. The old value isn't remembered anywhere; Python just forgets it existed.
 
-## Comments
-
-A line starting with \`#\` is a comment. Python ignores it, so use it to leave notes for yourself: \`# how many guesses so far\`.
+\`\`\`python
+score = 10
+print(score)   # 10
+score = 20     # not "score equals 20", but "point score at 20 instead"
+print(score)   # 20
+\`\`\`
 
 ## Types
 
-Every value has a type, which decides what you can do with it. The three you need now:
+Every value has a type, which decides what you can do with it.
 
 - \`int\`: whole numbers, like \`42\`
-- \`str\`: text in quotes, like \`"Ada"\`
-- \`bool\`: \`True\` or \`False\`
-
-Numbers with decimals are \`float\`, like \`9.99\`. Ask Python for a value's type with \`type(secret)\`.
-
-## Types don't mix freely
-
-\`"5" + 5\` is an error, because Python won't guess whether you meant text or a number. Convert first: \`int("5") + 5\` gives \`10\`, and \`str(5)\` gives \`"5"\`. This matters in the next lesson.
-
-## Try it
-
-- Make a variable \`attempts\` set to 0, then set it to \`attempts + 1\` and print it
-- Print \`type("42")\` and \`type(42)\` and compare`,
-    },
-    {
-      id: "guess-input-and-output",
-      title: "Input and output",
-      content: `By the end of this lesson you'll be able to ask the player a question and show a message that includes their answer.
-
-## Showing text
-
-\`print()\` writes a line to the terminal. You've used it already. Put a variable in the parentheses to show its value.
-
-## Asking a question
-
-\`input()\` shows a prompt, waits for the player to type and press Enter, then hands back what they typed.
+- \`float\`: numbers with a decimal point, like \`9.99\`
+- \`str\`: text, wrapped in quotes, like \`"Ada"\`
+- \`bool\`: exactly \`True\` or \`False\`, capital letters and no quotes
 
 \`\`\`python
-name = input("What's your name? ")
-print("Hello,", name)
+# type() tells you what you're actually holding, which matters once
+# variables start getting passed around and you lose track
+oven_temp = 350
+pizza_name = "Margherita"
+is_ready = False
+
+print(type(oven_temp))    # <class 'int'>
+print(type(pizza_name))   # <class 'str'>
+print(type(is_ready))     # <class 'bool'>
 \`\`\`
 
-## The catch: input is always text
+Python is dynamically typed: nothing stops you from pointing \`oven_temp\` at \`"too hot"\` next. That's convenient, but it means you're the one keeping track of what a variable holds, not the language.
 
-Whatever the player types comes back as a \`str\`, even digits. If you want to compare a guess to a number, convert it with \`int()\`:
+## Types don't mix on their own
+
+\`\`\`python
+age = "5" + 5
+\`\`\`
+
+This crashes with \`TypeError: can only concatenate str (not "int") to str\`. Python won't guess whether you meant to glue text together or add numbers, so it refuses both. Convert explicitly instead:
+
+\`\`\`python
+print(int("5") + 5)    # 10, both are numbers now
+print("5" + str(5))    # "55", both are text now
+\`\`\`
+
+## Printing and asking questions
+
+\`print()\` writes to the terminal. \`input()\` shows a prompt, waits for the player to type and hit Enter, and hands back whatever they typed.
+
+\`\`\`python
+name = input("What's your name? ")   # waits here until Enter is pressed
+print("Hello,", name)                 # print takes several values, comma-separated
+\`\`\`
+
+## input() always gives you text
+
+This is the one that catches people building their first guessing game: \`input()\` returns a \`str\`, always, even if the player typed only digits.
+
+\`\`\`python
+guess = input("Your guess: ")
+print(guess == 50)       # False, even if you typed 50: "50" is not 50
+print(int(guess) == 50)  # True, now they're both int
+\`\`\`
+
+Convert it the moment you read it, before you compare it to anything:
 
 \`\`\`python
 guess = int(input("Your guess: "))
 \`\`\`
 
-Without the \`int()\`, \`"50" == 50\` is \`False\`, and your game could never be won.
+Type a letter instead of a number here and the program crashes. That's expected for now; you'll handle it properly with \`try\`/\`except\` in Project 3.
 
-## Building messages
+## Building messages with f-strings
 
-An f-string puts values inside text. Start the string with \`f\` and wrap a variable in braces:
+Start a string with \`f\` and wrap a variable in braces to drop its value into the text:
 
 \`\`\`python
 attempts = 3
-print(f"Got it in {attempts} attempts!")
+print(f"Got it in {attempts} attempts!")   # Got it in 3 attempts!
+print(f"That's {attempts * 2} if you count the ones you take back")
 \`\`\`
 
-\`\`\`note
-If you type letters where a number is expected, \`int()\` crashes the program. That's fine for now. You'll handle it properly in Project 3.
-\`\`\``,
+Anything inside the braces is a real expression, not just a variable name, so \`{attempts * 2}\` works exactly like it looks.
+
+## Try it
+
+- Make three variables of different types, print each one with \`type()\`
+- Ask the player's name with \`input()\` and greet them with an f-string
+- Predict what \`"3" * 3\` prints before you run it, then check`,
     },
     {
-      id: "guess-making-decisions",
-      title: "Making decisions",
-      content: `By the end of this lesson you'll be able to make your program respond differently depending on the player's guess.
+      id: "guess-decisions-and-loops",
+      title: "Decisions and loops",
+      content: `By the end of this lesson you'll be able to make your program branch on a guess and repeat until the player wins.
 
 ## if, elif, else
 
-An \`if\` runs its block only when a condition is true. \`elif\` ("else if") checks another condition, and \`else\` catches everything that's left.
+\`if\` runs its block only when a condition is true. \`elif\` ("else if") checks another condition if the first was false. \`else\` catches whatever's left. Python checks top to bottom and runs the first branch that matches, then skips the rest, even if a later condition would also be true.
 
 \`\`\`python
+guess = 60
+secret = 42
+
 if guess < secret:
     print("Too low.")
 elif guess > secret:
     print("Too high.")
 else:
     print("Got it!")
+# prints "Too high.": elif and else never even get evaluated once a branch matches
 \`\`\`
 
-Python checks the conditions from the top and runs the first one that's true, then skips the rest.
+## Indentation is the block
 
-## Indentation matters
+The lines under \`if\` are indented four spaces. That indentation, not braces or a keyword, is how Python knows which lines belong to which branch. Mix tabs and spaces, or indent inconsistently, and you get a syntax error before the program even runs. Let your editor's Tab key do this for you.
 
-The lines under each \`if\` are indented by four spaces. That indentation is how Python knows which lines belong to which block. Mixing indentation levels is a syntax error, so let your editor's Tab key do the work.
+## Comparisons and combining conditions
 
-## Comparing values
+\`\`\`python
+# ==  equal            !=  not equal
+# <   less than        >   greater than
+# <=  less or equal    >=  greater or equal
 
-- \`==\` equal (two equals signs, because one is for storing)
-- \`!=\` not equal
-- \`<\`, \`>\`, \`<=\`, \`>=\` less, greater, and the "or equal" versions
+age = 20
+has_ticket = True
 
-## Try it
+# and: both sides must be true. or: at least one side. not: flips it.
+if age >= 18 and has_ticket:
+    print("Come on in.")
+if age < 13 or not has_ticket:
+    print("Not tonight.")
+\`\`\`
 
-Replace the "Nope." branch in your rough version with the three-way check above. Run it three times: guess too low, too high, and right.`,
-    },
-    {
-      id: "guess-repeating-with-while",
-      title: "Repeating with while",
-      content: `By the end of this lesson you'll be able to give the player as many guesses as they need, and count them.
+## while: repeat on a condition
 
-## The while loop
-
-A \`while\` loop repeats its block for as long as its condition is true.
+\`while\` keeps running its block as long as the condition is true, checked fresh each time round.
 
 \`\`\`python
 count = 0
-while count < 3:
-    print(count)
-    count = count + 1
+while count < 3:      # checked before every round, including the first
+    print(count)       # 0, 1, 2
+    count = count + 1   # forget this line and the loop never ends
 \`\`\`
 
-This prints 0, 1, 2 and stops. If the condition never becomes false, the loop runs forever. Press Ctrl+C in the terminal to stop it.
+If the condition never turns false, the loop runs until you kill it with Ctrl+C in the terminal. That's usually a bug, not a feature.
 
-## Loop until something happens
+## while True, and breaking out
 
-For a game, you don't know how many rounds it'll take. Use \`while True\` to loop indefinitely, and \`break\` to leave the loop when the player wins:
+A guessing game doesn't know in advance how many rounds it'll take, so loop forever and \`break\` out the moment the player wins:
 
 \`\`\`python
-while True:
+attempts = 0
+while True:   # loop forever, or at least until break fires: like a gym membership nobody cancels
     guess = int(input("Your guess: "))
-    if guess == secret:
-        print("Got it!")
-        break
+    attempts += 1   # shorthand for attempts = attempts + 1
+
+    if guess == 42:
+        print(f"Got it in {attempts} attempts!")
+        break   # only line in this whole file that can end the loop
+    print("Not quite.")
 \`\`\`
 
-## Counting
-
-Add to a counter each time round the loop. \`attempts += 1\` is a shorter way to write \`attempts = attempts + 1\`. Set \`attempts = 0\` before the loop starts, so it isn't reset every time round.
+\`break\` exits the loop immediately, skipping anything else in its body. Nothing after \`while True:\` runs again until it fires.
 
 ## Try it
 
-Wrap your guess-and-check code in a \`while True\` loop, add \`break\` to the winning branch, and print the attempts at the end.`,
+- Write a loop that prints "still going" five times using \`while\`, then change it to run forever and add a \`break\` when a counter hits 5
+- Combine \`if\`/\`elif\`/\`else\` with a loop: ask for a number 1 to 3 repeatedly, and \`break\` only when it's valid`,
     },
     {
-      id: "guess-using-random",
-      title: "Using random",
-      content: `By the end of this lesson you'll be able to make your game pick a different secret number every time.
+      id: "guess-standard-library",
+      title: "Using the standard library",
+      content: `By the end of this lesson you'll be able to pull in ready-made tools instead of writing everything yourself, and use one to make your game unpredictable.
 
-## Using code that's already written
+## import
 
-Python comes with a library of ready-made tools, grouped into modules. To use one, \`import\` it at the top of your file. The \`random\` module is for anything unpredictable.
+Python ships with a library of modules: bundles of tools grouped by job. \`import\` at the top of a file makes one available. The dot after the module name means "the thing inside it called this."
 
 \`\`\`python
 import random
 
-secret = random.randint(1, 100)
+secret = random.randint(1, 100)   # random.randint: a tool that lives inside random
 \`\`\`
 
-\`random.randint(1, 100)\` picks a whole number between 1 and 100, and both ends are included. The dot means "the \`randint\` tool inside \`random\`".
-
-## Checking it works
-
-Print the secret while you're testing, so you can confirm your hints are right:
+## random: for anything unpredictable
 
 \`\`\`python
-print(secret)
+import random
+
+# randint(a, b) picks a whole number, both ends included
+dice_roll = random.randint(1, 6)
+print(dice_roll)   # anywhere from 1 to 6, different every run
+
+# choice() picks one item out of a list: more on lists in Project 2
+prize = random.choice(["socks", "a gift card", "nothing, sorry"])
+print(prize)
 \`\`\`
 
-Delete that line when you're done, or you've spoiled your own game.
+While you're building and testing, it helps to print the secret so you can check your own hints are right. Delete that line before you call the game finished, or you've spoiled it for yourself.
+
+## A couple more modules worth knowing about
+
+You won't need these for this project, but they're the kind of thing that saves you writing code by hand later.
+
+\`\`\`python
+import math
+
+print(math.sqrt(16))     # 4.0: square root
+print(math.pi)            # 3.141592653589793: a constant, not a function, no parentheses
+
+import datetime
+
+print(datetime.date.today())   # today's date, e.g. 2026-09-24
+\`\`\`
+
+\`math.pi\` has no parentheses because it's a value sitting inside the module, not a function you call. Mixing that up (\`math.pi()\`) is a common typo.
 
 ## Try it
 
-- Run \`random.randint(1, 6)\` in a loop and print 5 results, like rolling a die
-- Change your game's range to 1 to 10 and see how much easier it gets
-
-Module 4 covers importing in more depth, including tools that don't come with Python.`,
+- Simulate flipping a coin ten times with \`random.choice(["heads", "tails"])\` in a loop, and count how many were heads
+- Print \`math.sqrt\` of a few numbers you can check by hand, like 9 and 25`,
     },
     {
       id: "guess-finish-the-project",
@@ -245,18 +296,16 @@ Module 4 covers importing in more depth, including tools that don't come with Py
 
 ## The finished program
 
-Put everything together. Read it top to bottom and check that you understand each line:
-
 \`\`\`python
 import random
 
-secret = random.randint(1, 100)
+secret = random.randint(1, 100)   # a fresh number every run
 attempts = 0
 
 print("I'm thinking of a number between 1 and 100.")
 
 while True:
-    guess = int(input("Your guess: "))
+    guess = int(input("Your guess: "))   # crashes on non-numbers: Project 3 fixes that
     attempts += 1
 
     if guess < secret:
@@ -265,10 +314,10 @@ while True:
         print("Too high.")
     else:
         print(f"Got it in {attempts} attempts!")
-        break
+        break   # the only way out of this loop
 \`\`\`
 
-Yours doesn't have to match exactly. It has to do the same things.
+Yours doesn't have to match this exactly. It has to do the same things, for the same reasons you now understand rather than by copying.
 
 ## Done when
 
@@ -276,13 +325,13 @@ Yours doesn't have to match exactly. It has to do the same things.
 - A guess below the secret prints "Too low.", and one above prints "Too high."
 - Guessing correctly ends the game and prints the number of attempts
 - Running it twice uses a different secret each time
-- You can explain what \`input()\`, \`if\`, \`while\`, and \`import\` each do
+- You can explain, without looking it up, why \`input()\` needs \`int()\` around it
 
 ## Stretch goals
 
-- Tell the player when they've guessed the same number twice
-- Add a limit of 7 guesses and reveal the secret if they run out
-- Ask "Play again?" when a game ends`,
+- Tell the player when they've guessed the same number twice (hint: you'll want a list, coming in Project 2)
+- Add a limit of 7 guesses using a second loop condition, and reveal the secret if they run out
+- Ask "Play again?" after a game ends, and loop the whole game if they say yes`,
     },
   ],
 };
