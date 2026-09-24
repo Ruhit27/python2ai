@@ -5,7 +5,8 @@
 /* eslint-disable react-hooks/immutability */
 
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, PerformanceMonitor } from "@react-three/drei";
+import { DepthOfField, EffectComposer } from "@react-three/postprocessing";
 import {
   forceCenter,
   forceLink,
@@ -17,6 +18,7 @@ import {
 } from "d3-force-3d";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  CanvasTexture,
   Color,
   DynamicDrawUsage,
   MathUtils,
@@ -26,10 +28,13 @@ import {
   type BufferGeometry,
   type Fog,
   type PerspectiveCamera,
+  type Sprite,
+  type SpriteMaterial,
   type InstancedMesh,
 } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { DictionaryTerm } from "@/lib/dictionary";
+import { SECTION_COLORS } from "./colors";
 import { playHover } from "./sound";
 
 /** Screen-space label positions, written every frame and drawn by the DOM overlay. */
@@ -44,6 +49,8 @@ export type LabelData = {
 type Props = {
   /** Pixels of the right edge covered by the side panel. */
   insetRight: number;
+  /** `section` colors nodes by curriculum section; `mono` keeps them grey. */
+  colorMode: "mono" | "section";
   labelData: LabelData;
   terms: DictionaryTerm[];
   connections: Map<string, Set<string>>;
@@ -57,10 +64,12 @@ const BG = new Color("#ecebe8");
 const DARK = new Color("#262626");
 const FADED = new Color("#b4b4b0");
 const FOCUS_DISTANCE = 28;
-const FLIGHT_SECONDS = 2.8;
-// How far the camera pulls back mid-flight, and how far it swings around.
-const FLIGHT_PULL = 80;
-const FLIGHT_SWING = 1.0;
+// A flight scales with how far the camera has to travel: short hops between
+// nearby terms are quick, long ones pull back further and swing wider.
+const FLIGHT_SECONDS = [1.3, 2.8] as const;
+const FLIGHT_PULL = [30, 80] as const;
+const FLIGHT_SWING = [0.5, 1.0] as const;
+const FLIGHT_FULL_TRAVEL = 20;
 
 type SimNode = {
   x: number;
@@ -76,11 +85,12 @@ type SimNode = {
 
 function buildModel(terms: DictionaryTerm[], connections: Map<string, Set<string>>) {
   const indexOf = new Map(terms.map((t, i) => [t.slug, i]));
-  // Start collapsed near the middle so the graph visibly unfolds into place.
+  // Start slightly contracted around the precomputed layout so the graph eases
+  // out into place. Starting on top of each other makes repulsion explode.
   const nodes: SimNode[] = terms.map((t) => ({
-    x: t.position[0] * 0.2,
-    y: t.position[1] * 0.2,
-    z: t.position[2] * 0.2,
+    x: t.position[0] * 0.6,
+    y: t.position[1] * 0.6,
+    z: t.position[2] * 0.6,
     ax: t.position[0],
     ay: t.position[1],
     az: t.position[2],
@@ -97,14 +107,14 @@ function buildModel(terms: DictionaryTerm[], connections: Map<string, Set<string
     [...(connections.get(t.slug) ?? [])].map((s) => indexOf.get(s)!),
   );
   const sim = forceSimulation(nodes, 3)
-    .force("charge", forceManyBody().strength(-30))
+    .force("charge", forceManyBody().strength(-30).distanceMin(2).distanceMax(40))
     .force("link", forceLink(edges.map(([source, target]) => ({ source, target }))).distance(3.4).strength(0.3))
     .force("center", forceCenter(0, 0, 0))
     .force("x", forceX((d: SimNode) => d.ax).strength(0.05))
     .force("y", forceY((d: SimNode) => d.ay).strength(0.05))
     .force("z", forceZ((d: SimNode) => d.az).strength(0.05))
-    .alphaDecay(0.012)
-    .velocityDecay(0.3)
+    .alphaDecay(0.03)
+    .velocityDecay(0.5)
     .stop();
   return {
     indexOf,
@@ -121,7 +131,7 @@ function buildModel(terms: DictionaryTerm[], connections: Map<string, Set<string
   };
 }
 
-function Scene({ insetRight, labelData, terms, connections, selected, matches, onSelect }: Props) {
+function Scene({ insetRight, colorMode, labelData, terms, connections, selected, matches, onSelect }: Props) {
   const model = useMemo(() => buildModel(terms, connections), [terms, connections]);
   const { camera, size, clock, scene } = useThree();
   const controls = useRef<OrbitControlsImpl>(null);
@@ -133,7 +143,15 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
   const selectedIdx = selected ? (model.indexOf.get(selected) ?? -1) : -1;
   const selectedRef = useRef(-1);
   const lastSel = useRef(-1);
-  const flight = useRef<{ start: number; from: Vector3; distance: number; dir: Vector3 } | null>(null);
+  const flight = useRef<{
+    start: number;
+    from: Vector3;
+    distance: number;
+    dir: Vector3;
+    seconds: number;
+    pull: number;
+    swing: number;
+  } | null>(null);
   const roll = useRef(0);
   const camDistance = useRef(32);
   const viewShift = useRef(0);
@@ -141,6 +159,22 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
   const matchesRef = useRef<Set<string> | null>(null);
   const drag = useRef<{ index: number; startX: number; startY: number; moved: boolean } | null>(null);
   const dummy = useMemo(() => new Object3D(), []);
+  const sectionColors = useMemo(() => terms.map((t) => new Color(SECTION_COLORS[t.section % SECTION_COLORS.length])), [terms]);
+  const selHalo = useRef<Sprite>(null);
+  const hovHalo = useRef<Sprite>(null);
+  // Soft radial glow drawn behind the selected and hovered node.
+  const haloTexture = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 128;
+    const g = canvas.getContext("2d")!;
+    const gradient = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, "rgba(0,0,0,0.5)");
+    gradient.addColorStop(0.4, "rgba(0,0,0,0.14)");
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, 128, 128);
+    return new CanvasTexture(canvas);
+  }, []);
   const tmp = useMemo(() => ({ a: new Vector3(), b: new Vector3(), c: new Vector3(), d: new Vector3(), plane: new Plane(), color: new Color() }), []);
 
   const lineBuffers = useMemo(
@@ -162,7 +196,7 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
     matchesRef.current = matches;
   }, [matches]);
   useEffect(() => {
-    model.sim.alpha(1);
+    model.sim.alpha(0.5);
     return () => void model.sim.stop();
   }, [model]);
 
@@ -206,12 +240,28 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
       dummy.scale.setScalar(radius[i] * scale);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
-      tmp.color.copy(FADED).lerp(DARK, emphasis[i]);
+      tmp.color.copy(FADED).lerp(colorMode === "section" ? sectionColors[i] : DARK, emphasis[i]);
       mesh.setColorAt(i, tmp.color);
     }
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.computeBoundingSphere();
+
+    // Glow behind the selected node, and behind the hovered one.
+    for (const [ref, index, strength, wobble] of [
+      [selHalo, sel, 1, 0.5],
+      [hovHalo, hov !== null && hov !== sel ? hov : -1, 0.7, 0.3],
+    ] as const) {
+      const halo = ref.current;
+      if (!halo) continue;
+      const material = halo.material as SpriteMaterial;
+      material.opacity = MathUtils.damp(material.opacity, index >= 0 ? strength : 0, 5, dt);
+      halo.visible = material.opacity > 0.01;
+      if (index >= 0) {
+        halo.position.set(pos[index * 3], pos[index * 3 + 1], pos[index * 3 + 2]);
+        halo.scale.setScalar(radius[index] * (9 + wobble * Math.sin(t * 2)));
+      }
+    }
 
     // Edges and the particles flowing along them.
     const lp = lineBuffers.pos;
@@ -291,18 +341,24 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
         lastSel.current = sel;
         if (sel >= 0) {
           const offset = tmp.c.subVectors(camera.position, c.target);
+          tmp.a.set(pos[sel * 3], pos[sel * 3 + 1], pos[sel * 3 + 2]);
+          const span = MathUtils.clamp(c.target.distanceTo(tmp.a) / FLIGHT_FULL_TRAVEL, 0, 1);
+          const lerp = (range: readonly [number, number]) => range[0] + (range[1] - range[0]) * span;
           flight.current = {
             start: t,
             from: c.target.clone(),
             distance: offset.length(),
             dir: offset.normalize().clone(),
+            seconds: lerp(FLIGHT_SECONDS),
+            pull: lerp(FLIGHT_PULL),
+            swing: lerp(FLIGHT_SWING),
           };
         } else flight.current = null;
       }
       const f = flight.current;
       let rollTarget = 0;
       if (f && sel >= 0) {
-        const p = Math.min((t - f.start) / FLIGHT_SECONDS, 1);
+        const p = Math.min((t - f.start) / f.seconds, 1);
         const u = p < 0.5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2;
         tmp.a.set(pos[sel * 3], pos[sel * 3 + 1], pos[sel * 3 + 2]);
         // Curve the look-at point through the middle of the graph, so the whole
@@ -311,8 +367,8 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
           .copy(f.from)
           .multiplyScalar((1 - u) ** 2)
           .addScaledVector(tmp.a, u * u);
-        const distance = f.distance + (FOCUS_DISTANCE - f.distance) * u + FLIGHT_PULL * Math.sin(Math.PI * u);
-        tmp.d.copy(f.dir).applyAxisAngle(UP, FLIGHT_SWING * u);
+        const distance = f.distance + (FOCUS_DISTANCE - f.distance) * u + f.pull * Math.sin(Math.PI * u);
+        tmp.d.copy(f.dir).applyAxisAngle(UP, f.swing * u);
         camera.position.copy(c.target).addScaledVector(tmp.d, distance);
         rollTarget = 0.22 * Math.sin(Math.PI * u);
         if (p >= 1) flight.current = null;
@@ -399,6 +455,15 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
   return (
     <>
       <fog attach="fog" args={["#ecebe8", 24, 70]} />
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[6, 10, 12]} intensity={1.7} />
+
+      <sprite ref={selHalo} renderOrder={1.5} visible={false}>
+        <spriteMaterial map={haloTexture} transparent opacity={0} depthWrite={false} depthTest={false} fog={false} />
+      </sprite>
+      <sprite ref={hovHalo} renderOrder={1.5} visible={false}>
+        <spriteMaterial map={haloTexture} transparent opacity={0} depthWrite={false} depthTest={false} fog={false} />
+      </sprite>
 
       <lineSegments frustumCulled={false} renderOrder={0}>
         <bufferGeometry ref={lineGeo}>
@@ -432,11 +497,12 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
         }}
       >
         <sphereGeometry args={[1, 24, 24]} />
-        <meshBasicMaterial />
+        <meshStandardMaterial roughness={0.55} metalness={0} />
       </instancedMesh>
 
       <OrbitControls
         ref={controls}
+        makeDefault
         enableDamping
         dampingFactor={0.06}
         enablePan={false}
@@ -451,10 +517,45 @@ function Scene({ insetRight, labelData, terms, connections, selected, matches, o
   );
 }
 
-export default function DictionaryGraph(props: Props) {
+/** Depth of field: nodes far from the camera's focus blur, like the hosted site. */
+function Effects() {
+  const camera = useThree((state) => state.camera);
+  const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dof = useRef<any>(null);
+
+  useFrame(() => {
+    const effect = dof.current;
+    if (!effect || !controls) return;
+    effect.circleOfConfusionMaterial.worldFocusDistance = camera.position.distanceTo(controls.target);
+    effect.circleOfConfusionMaterial.worldFocusRange = 22;
+  });
+
   return (
-    <Canvas camera={{ position: [0, 0, 32], fov: 50 }} dpr={[1, 2]}>
+    <EffectComposer multisampling={0}>
+      <DepthOfField ref={dof} bokehScale={3} height={480} />
+    </EffectComposer>
+  );
+}
+
+// Heavy effects are skipped on touch devices and machines that report few
+// cores or little memory; a frame-rate monitor switches them off if they lag.
+function canRunEffects() {
+  const override = new URLSearchParams(window.location.search).get("fx");
+  if (override) return override === "on";
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  return !coarse && (nav.hardwareConcurrency ?? 8) > 4 && (nav.deviceMemory ?? 8) > 4;
+}
+
+export default function DictionaryGraph(props: Props) {
+  const [effects, setEffects] = useState(canRunEffects);
+  return (
+    <Canvas camera={{ position: [0, 0, 32], fov: 50 }} dpr={[1, effects ? 1.5 : 2]}>
+      <color attach="background" args={["#ecebe8"]} />
+      <PerformanceMonitor bounds={() => [24, 200]} onDecline={() => setEffects(false)} />
       <Scene {...props} />
+      {effects && <Effects />}
     </Canvas>
   );
 }
