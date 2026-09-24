@@ -12,28 +12,28 @@ export const weatherNowModule: CourseModule = {
 
 ## What you'll build
 
-You type a city name. The program looks up where it is, asks a weather service for the current conditions there, and prints the temperature and wind. If the city doesn't exist, or your connection is down, it says so. The sample run shows the finished program.
+You type a city name. The program looks up where it is, asks a weather service for the current conditions there, and prints the temperature and wind. If the city doesn't exist, or your connection is down, it says so instead of crashing. The sample run shows the finished program.
 
 ## The rough version
 
-Here is what you can do with only what you know so far:
+Here's as far as you can get with only what you know so far:
 
 \`\`\`python
 city = input("City: ")
-print(f"The weather in {city} is... unknown.")
+print(f"The weather in {city} is... unknown.")   # no way to find out yet
 \`\`\`
 
-To do better, your program has to talk to another computer. That needs code that doesn't come with Python.
+To do better, your program has to talk to another computer over the internet, and that needs code that doesn't come built into Python.
 
 ## What's new in this module
 
-- Installing a package: code written by other people
-- Keeping each project's packages separate with \`uv\`
-- Calling an API and reading the JSON it sends back
-- Coping with things that fail because they're out of your control
+- Installing a package: code someone else wrote, that your project depends on
+- Keeping each project's packages separate, with \`uv\`
+- Calling an API and reading the JSON data it sends back
+- Coping with a request that fails for reasons entirely outside your code
 
 \`\`\`note
-The weather comes from Open-Meteo, which is free and needs no account or key.
+The weather comes from Open-Meteo, which is free and needs no account or key. That's why this project, not a paid API, is the one you're building.
 \`\`\``,
       extra: (
         <SampleRun
@@ -47,259 +47,239 @@ The weather comes from Open-Meteo, which is free and needs no account or key.
       ),
     },
     {
-      id: "weather-importing-code",
-      title: "Importing code",
-      content: `By the end of this lesson you'll be able to pull in code from Python's standard library and from your own files.
+      id: "weather-importing-and-environments",
+      title: "Importing code, and why environments exist",
+      content: `By the end of this lesson you'll be able to pull in code from the standard library and your own files, and know why installed packages live in a project-specific place.
 
 ## The standard library
 
-Python ships with modules for many jobs: \`random\` for chance, \`string\` for text helpers, \`json\` for data, \`datetime\` for dates. You've imported two already.
+Python ships with modules for dozens of jobs: \`random\` for chance, \`string\` for text helpers, \`json\` for data, \`datetime\` for dates. You've already imported three of these.
 
 ## Three ways to import
 
 \`\`\`python
-import random
-from datetime import date
-import json as js
+import random                    # random.randint(...): full name every time
+from datetime import date        # date.today(): pulled one name out directly
+import json as js                # js.dumps(...): given a shorter local name
 \`\`\`
 
-- \`import random\` gives you the module, and you write \`random.randint(...)\`
-- \`from datetime import date\` pulls one name out, and you write just \`date.today()\`
-- \`import x as y\` gives it a shorter name
+Weather Now itself only needs one import, \`import requests\`, the plain first form. These other two forms are here so you recognize them: you'll use \`from datetime import date\` and \`import json\` for real in the capstone.
 
 ## Your own files are modules too
 
-If you have a file \`helpers.py\` next to your script that defines \`def shout(text): ...\`, then \`from helpers import shout\` works. Splitting a large program across files this way is how real projects stay readable.
+A file \`helpers.py\` sitting next to your script, containing \`def shout(text): return text.upper()\`, can be pulled in with \`from helpers import shout\`. Splitting a program across files this way, instead of one growing script, is how real projects stay navigable once they get past a couple hundred lines. Weather Now itself stays small enough to live in one file, so you won't split it, but it's worth knowing this exists once your own projects grow past this course.
 
-## Packages
+## Packages need installing before you can import them
 
-A package is a bundle of modules that someone else published. Python's standard library is always there, but packages must be installed before you can import them. Try \`import requests\` on a fresh machine and you'll get a \`ModuleNotFoundError\`. The next two lessons fix that.
+A package is a bundle of modules someone else wrote and published for others to reuse. The standard library is always there; a package like \`requests\` is not, until you install it.
 
-## Try it
+\`\`\`python
+import requests
+# ModuleNotFoundError: No module named 'requests'
+# on a machine where it was never installed
+\`\`\`
 
-Import \`date\` from \`datetime\`, and print \`date.today()\`.`,
-    },
-    {
-      id: "weather-virtual-environments",
-      title: "Virtual environments",
-      content: `By the end of this lesson you'll understand why each project gets its own set of packages.
+## Why isolate each project's packages
 
-## The problem
+Different projects want different packages, and sometimes different versions of the same one. If everything installed into one shared, computer-wide place, upgrading a package for one project could quietly break another one you haven't touched in months. A virtual environment is a private folder of installed packages, scoped to one project, so that can't happen.
 
-Different projects need different packages, and sometimes different versions of the same one. If everything installs into one shared place, a change for one project can silently break another.
-
-A virtual environment is a private folder of packages for one project. Python has a built-in tool for it, called \`venv\`.
-
-## Create and activate one
+Python's built-in way to make one is the \`venv\` module:
 
 \`\`\`bash
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate    # Windows: .venv\\Scripts\\activate
 \`\`\`
 
-On Windows, activate with \`.venv\\Scripts\\activate\` instead. Your prompt now shows \`(.venv)\`, and anything you \`pip install\` stays in this project.
-
-## Rules of thumb
-
-- One virtual environment per project
-- Never commit \`.venv/\` to git, the tool that tracks changes to code. If you don't use git yet, ignore this
-- Run \`deactivate\` to leave it
-
-You won't do this by hand much. The next lesson introduces a tool that creates and uses the environment for you. It's still worth knowing what it's doing underneath.
+Your prompt now shows \`(.venv)\`, and anything you \`pip install\` from here stays inside this project. \`deactivate\` leaves it. You're about to meet a tool that does this step for you automatically, so this is the last time in the course you'll type \`venv\` by hand, but it's worth knowing what's happening underneath.
 
 ## Try it
 
-Make a \`.venv\` in a scratch folder, activate it, and run \`pip list\`. It's nearly empty, which is the point.`,
+- Import \`date\` from \`datetime\` and print \`date.today()\`
+- Make a \`.venv\` in a scratch folder, activate it, and run \`pip list\`. It's nearly empty, which is the whole point`,
       extra: <VenvDiagram accent="#5B9BD5" />,
     },
     {
-      id: "weather-managing-packages-with-uv",
+      id: "weather-uv",
       title: "Managing packages with uv",
-      content: `By the end of this lesson you'll be able to start a project, install a package, and run your code with one tool.
+      content: `By the end of this lesson you'll be able to start a project, install a package, and run your code with a single tool.
 
 ## What uv is
 
-\`uv\` is a fast tool that handles Python versions, virtual environments, and packages together. Install it from the instructions at docs.astral.sh/uv, then check it with \`uv --version\`.
+\`uv\` handles Python versions, virtual environments, and packages together, and does it fast. Install it from the instructions at docs.astral.sh/uv, then confirm with:
+
+\`\`\`bash
+uv --version
+\`\`\`
 
 ## Start the weather project
 
 \`\`\`bash
-uv init weather-now
+uv init weather-now    # creates the folder, with a starter main.py inside
 cd weather-now
-uv add requests
+uv add requests        # installs requests, into this project only
 \`\`\`
 
-\`uv init\` makes the folder, with a \`main.py\` in it. \`uv add requests\` installs the \`requests\` package into the project's own environment and records it in \`pyproject.toml\`, so anyone else can rebuild the same setup.
+\`uv add\` does two things at once: it installs the package into the project's own environment, and it records the exact version in \`pyproject.toml\`, so anyone who clones the project can rebuild the identical setup with one command.
 
-## Run your code
+## Running your code
 
 \`\`\`bash
 uv run main.py
 \`\`\`
 
-\`uv run\` uses the project's environment for you, so there's nothing to activate. Use it for the rest of this course.
+\`uv run\` uses the project's environment automatically. There's no \`source .venv/bin/activate\` to remember or forget. Use \`uv run\` for the rest of this course, including the capstone.
 
 ## Try it
 
-Replace the contents of \`main.py\` with \`import requests\` followed by \`print(requests.__version__)\`, and run it. If it prints a version number, the package is installed.`,
+Replace \`main.py\`'s contents with:
+
+\`\`\`python
+import requests
+
+print(requests.__version__)   # confirms the package actually installed
+\`\`\`
+
+Run it with \`uv run main.py\`. A version number means it worked.`,
       extra: <UvDiagram accent="#5B9BD5" />,
     },
     {
-      id: "weather-calling-an-api",
-      title: "Calling an API",
-      content: `By the end of this lesson you'll be able to ask a web service for data from your own code.
+      id: "weather-api-and-json",
+      title: "Calling an API and reading JSON",
+      content: `By the end of this lesson you'll be able to ask a web service for data, and pull the values you want out of what it sends back.
 
 ## What an API is
 
-An API is a way for programs to talk to each other. You send a request to a web address, and the service sends back data. Your browser does the same thing when it loads a page, except an API returns data made for programs, not for eyes.
+An API is a way for programs to talk to each other. You send a request to a web address; the service sends back data shaped for programs, not for a browser to render as a page.
 
 ## Your first request
+
+This is the request \`find_city\` in \`weather.py\` sends, one piece at a time:
 
 \`\`\`python
 import requests
 
 response = requests.get(
     "https://geocoding-api.open-meteo.com/v1/search",
-    params={"name": "Berlin", "count": 1},
-    timeout=10,
+    params={"name": "Berlin", "count": 1},   # added onto the address for you
+    timeout=10,                               # give up after 10s instead of hanging forever
 )
-print(response.status_code)
+print(response.status_code)   # 200 means it worked
 \`\`\`
 
-- The first argument is the address
-- \`params\` are extra details added to the address for you
-- \`timeout=10\` gives up after ten seconds instead of waiting forever. Always set one
+\`200\` means success. \`404\` means not found. Anything in the 400s or 500s means something went wrong. \`response.raise_for_status()\` turns a bad status into an exception automatically, so you don't have to remember to check the number by hand every time.
 
-## Status codes
+## JSON looks like dictionaries and lists, because it becomes them
 
-The number in \`response.status_code\` says how it went. \`200\` means success. \`404\` means not found. Anything in the 400s or 500s is a failure. \`response.raise_for_status()\` turns those failures into an exception, so you don't have to remember to check.
-
-## Try it
-
-Run the request above and print the status code. Then change \`"Berlin"\` to your own city.`,
-    },
-    {
-      id: "weather-reading-json",
-      title: "Reading JSON",
-      content: `By the end of this lesson you'll be able to pull the values you want out of an API's response.
-
-## JSON is dictionaries and lists
-
-Most APIs reply in JSON, a text format that looks like Python dictionaries and lists. \`response.json()\` turns it into real ones you can use.
+Most APIs reply in JSON, a text format that maps directly onto Python dictionaries and lists. \`response.json()\` does that conversion for you.
 
 \`\`\`python
 data = response.json()
-place = data["results"][0]
+place = data["results"][0]   # "results" is a list; [0] takes its first item
 print(place["name"], place["latitude"], place["longitude"])
 \`\`\`
 
-Read it as a path: the key \`"results"\` holds a list, \`[0]\` takes its first item, and that item is a dictionary.
+Read a chain like \`data["results"][0]["name"]\` as a path: go into \`"results"\`, take the first item, then read its \`"name"\`.
 
 ## Explore before you extract
 
-Print the whole response first and read it. Look for the keys you need. Nearly every mistake with APIs comes from guessing at the structure.
+Print the whole response and read it before you write code that reaches into it. Guessing at a key that isn't there is where nearly every API bug starts.
 
-## When a key might be missing
+## A missing key isn't the same as an empty list
 
-If a city doesn't exist, \`"results"\` isn't in the reply at all, and \`data["results"]\` raises a \`KeyError\`. Use \`.get\` and check:
+If a city doesn't exist, \`"results"\` might be missing from the reply entirely, and \`data["results"]\` raises \`KeyError\`. \`.get\` returns \`None\` instead of crashing, so you can check first:
 
 \`\`\`python
 results = response.json().get("results")
-if not results:
+if not results:            # catches both "key missing" and "empty list"
     print("No such city.")
 \`\`\`
 
-## Saving and loading JSON yourself
+## The weather request itself
 
-The \`json\` module does the same conversion for your own data and files. \`json.dump(data, file)\` writes a dictionary or list to a file, and \`json.load(file)\` reads it back:
-
-\`\`\`python
-import json
-
-with open("data.json", "w", encoding="utf-8") as file:
-    json.dump({"visits": 3}, file)
-
-with open("data.json", encoding="utf-8") as file:
-    data = json.load(file)
-\`\`\`
-
-You'll use this in the capstone.
-
-## The weather request
-
-The weather service takes a latitude and a longitude, and a list of the values you want:
+The weather service wants a latitude and longitude, plus a list of which values you want back:
 
 \`\`\`python
 weather = requests.get(
     "https://api.open-meteo.com/v1/forecast",
     params={
-        "latitude": place["latitude"],
+        "latitude": place["latitude"],       # from the geocoding request above
         "longitude": place["longitude"],
-        "current": "temperature_2m,wind_speed_10m",
+        "current": "temperature_2m,wind_speed_10m",   # comma-separated, no spaces
     },
     timeout=10,
-).json()["current"]
+).json()["current"]   # chained straight through: response -> json -> "current"
+
+print(weather["temperature_2m"], weather["wind_speed_10m"])
 \`\`\`
+
+## Saving your own data as JSON
+
+The \`json\` module does the same conversion for data you make yourself, not just API replies. \`json.dump\` writes a dictionary or list to a file; \`json.load\` reads it back into real Python data.
+
+\`\`\`python
+import json
+
+data = {"Read": ["2026-09-24"]}   # a habit name mapped to the dates it was done: the exact shape the capstone will save
+
+with open("data.json", "w", encoding="utf-8") as file:
+    json.dump(data, file, indent=2)   # indent=2 just makes the file readable
+
+with open("data.json", encoding="utf-8") as file:
+    reloaded = json.load(file)
+
+print(reloaded)   # {'Read': ['2026-09-24']}
+\`\`\`
+
+You'll use exactly this pair in the capstone, to save a learner's habits between runs.
 
 ## Try it
 
-Print the weather dictionary and find the two values you'll show.`,
+- Print the full response from the geocoding request for your own city and find the keys you'll need
+- Save a small dictionary of your own to \`data.json\`, then load it back and print it`,
     },
     {
-      id: "weather-handling-failures",
-      title: "When things fail",
-      content: `By the end of this lesson you'll be able to make a program that survives a dead connection.
+      id: "weather-failures-and-finish",
+      title: "Handling failures, and finishing the project",
+      content: `By the end of this lesson you'll have a finished Weather Now that survives a dead connection, and a checklist to prove it.
 
-## The network isn't yours
+## The network isn't yours to control
 
-Code that talks to the internet fails in ways your own code never does: no connection, a slow server, a service that's down. You can't prevent these, so you handle them.
+Code that talks to the internet fails in ways your own code never does: no connection, a slow server, a service that's down entirely. You can't prevent any of that, so you handle it instead.
 
-## One exception to catch
+## One exception covers the whole family
 
-Every problem \`requests\` can have, including timeouts and failed status checks, is a subclass of \`requests.RequestException\`. Catch that one, and you cover all of them:
+Every failure \`requests\` can produce, including a timeout and a bad status from \`raise_for_status()\`, is a subclass of \`requests.RequestException\`. Catching that one exception catches all of them:
 
 \`\`\`python
 try:
     response = requests.get(url, timeout=10)
     response.raise_for_status()
 except requests.RequestException:
-    print("Couldn't reach the service.")
+    print("Couldn't reach the service.")   # covers timeouts, DNS failures, 500s, all of it
 \`\`\`
 
-## Testing it
+Test this by turning off your Wi-Fi and running the program. A clean message instead of a traceback means it works.
 
-Turn off your Wi-Fi and run the program. If it prints your message instead of a traceback, it works.
+## Keep the try block small
 
-## Keep the try small
-
-Wrap only the code that can fail with the network. If your \`try\` block holds everything, real bugs in your own logic get swallowed by the same message.
-
-## Try it
-
-Run your request with the internet off, first without the \`try\`, to see the traceback, then with it.`,
-    },
-    {
-      id: "weather-finish-the-project",
-      title: "Finish the project",
-      content: `By the end of this lesson you'll have a finished Weather Now program and a checklist to prove it works.
+Wrap only the lines that can actually fail over the network. If the \`try\` block also holds your own logic, a real bug in that logic gets silently relabeled as a "connection problem," and you'll spend an hour debugging the wrong thing.
 
 ## The finished program
-
-Put this in \`main.py\` inside your \`weather-now\` folder:
 
 \`\`\`python
 import requests
 
 
 def find_city(name):
+    # geocoding: turns a city name into coordinates the forecast API understands
     response = requests.get(
         "https://geocoding-api.open-meteo.com/v1/search",
         params={"name": name, "count": 1},
         timeout=10,
     )
-    response.raise_for_status()
+    response.raise_for_status()          # turns a bad status into an exception
     results = response.json().get("results")
-    return results[0] if results else None
+    return results[0] if results else None   # None when nothing matched
 
 
 def get_weather(latitude, longitude):
@@ -327,24 +307,27 @@ try:
         print(f"{place['name']}, {place['country']}")
         print(f"{now['temperature_2m']}°C, wind {now['wind_speed_10m']} km/h")
 except requests.RequestException:
+    # covers both requests failing outright (offline) and raise_for_status()
+    # above turning a bad reply into this same exception
     print("Couldn't reach the weather service. Check your connection.")
 \`\`\`
 
-Each function does one job and returns data. The code at the bottom decides what to show. Your numbers will differ from the sample run, because it's live weather.
+Each function does one job and returns data; the code at the bottom decides what to show with it, the same split you used for \`add\`/\`show\`/\`complete\` in Project 2. Your own numbers will differ from the sample run, since it's live weather.
 
 ## Done when
 
 - A real city prints its name, country, temperature, and wind speed
-- A made-up city prints "No city called ..." and no traceback
-- With Wi-Fi off, it prints the connection message and no traceback
-- \`uv run main.py\` works from a fresh terminal without activating anything
+- A made-up city prints "No city called ..." with no traceback
+- With Wi-Fi off, it prints the connection message, not a traceback
+- \`uv run main.py\` works from a fresh terminal, with nothing manually activated
 - \`pyproject.toml\` lists \`requests\` as a dependency
+- You can explain why the \`try\` block wraps only the two \`requests.get\` calls, not the whole program
 
 ## Stretch goals
 
-- Show the temperature in Fahrenheit too
-- Loop, so you can check several cities without restarting
-- Add \`"precipitation"\` to the values you request`,
+- Show the temperature in Fahrenheit too, converted from the Celsius you already have
+- Loop, so you can check several cities in one run without restarting
+- Add \`"precipitation"\` to the values you request from the forecast API`,
     },
   ],
 };

@@ -59,7 +59,10 @@ About three hours. Take a break after each checkpoint.`,
 Everything else follows from how you store a habit. Here is a simple shape: a dictionary where each key is a habit name, and each value is a list of the dates you did it.
 
 \`\`\`python
-{"Read": ["2026-09-24", "2026-09-25"], "Run": []}
+{
+    "Read": ["2026-09-24", "2026-09-25"],  # two check-ins so far
+    "Run": [],                              # tracked, but never actually run
+}
 \`\`\`
 
 Dates are stored as text in the form \`YYYY-MM-DD\`. That form sorts correctly and saves straight to a file with no conversion.
@@ -104,7 +107,7 @@ Get today's date as text with:
 \`\`\`python
 from datetime import date
 
-today = date.today().isoformat()
+today = date.today().isoformat()   # "2026-09-24": a string, ready to store and compare
 \`\`\`
 
 ## Done when
@@ -136,10 +139,10 @@ Python's \`json\` module converts dictionaries and lists to and from files. It's
 import json
 
 with open("habits.json", "w", encoding="utf-8") as file:
-    json.dump(habits, file, indent=2)
+    json.dump(habits, file, indent=2)   # your dictionary, turned into text on disk
 
 with open("habits.json", encoding="utf-8") as file:
-    habits = json.load(file)
+    habits = json.load(file)            # and back into a real dictionary again
 \`\`\`
 
 \`indent=2\` makes the saved file readable when you open it.
@@ -184,7 +187,7 @@ It replies with a list holding one dictionary. The quote text is under the key \
 
 ## Hints
 
-- Review "When things fail" in Project 4. One \`except requests.RequestException\` covers the network
+- Review "Handling failures, and finishing the project" in Project 4. One \`except requests.RequestException\` covers the network
 - The reply could also come back empty or in an unexpected shape. Catching \`KeyError\`, \`IndexError\`, and \`ValueError\` as well makes it sturdy
 - Keep the \`try\` around the request only`,
     },

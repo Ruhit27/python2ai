@@ -25,7 +25,7 @@ Every module opens by showing you the finished program running, and a rough vers
 
 ## What you'll need
 
-About ten hours in total, spread over as many days as you like. You'll run every program on your own computer, so the next two lessons get Python installed. If Python is already set up, skip ahead to Module 1.
+About eighteen hours in total: roughly 3.75 hours per project across the four modules, plus 3 hours for the capstone. Spread it over as many days as you like. You'll run every program on your own computer, so the next two lessons get Python installed. If Python is already set up, skip ahead to Module 1.
 
 \`\`\`note
 Type the code yourself instead of pasting it. It feels slower, but it's how the syntax settles into your hands.
@@ -91,10 +91,22 @@ python3 hello.py
 
 Python reads the file from top to bottom and does what each line says. Here, it prints the text between the quotes.
 
+## Leaving yourself notes
+
+Every code example in this course includes comments: lines starting with \`#\`. Python skips them completely, so they change nothing about how the program runs. They're there so a reader, including you in six months, knows what a line is for.
+
+\`\`\`python
+# this line does nothing when the program runs
+print("Hello, world!")  # this one prints a greeting
+\`\`\`
+
+A comment can sit on its own line or trail after code on the same line. From here on, expect to see them everywhere.
+
 ## Try it
 
 - Change the message and run the file again
-- Add a second \`print\` line and see what order the output appears in`,
+- Add a second \`print\` line and see what order the output appears in
+- Add a comment above it explaining what it does, then delete the line below it and see that nothing runs`,
       extra: (
         <SampleRun
           steps={[

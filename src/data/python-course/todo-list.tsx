@@ -15,10 +15,10 @@ You type \`add\` to add a task, \`done\` to tick one off, \`list\` to see everyt
 
 ## The rough version
 
-This version handles one task and forgets it as soon as you add another.
+This version handles one task and forgets it the moment you add another.
 
 \`\`\`python
-task = input("Task: ")
+task = input("Task: ")   # only one task fits, ever
 print("1. [ ]", task)
 \`\`\`
 
@@ -27,9 +27,9 @@ print("1. [ ]", task)
 - It holds a single task, so you can't build a list
 - There's no menu, so you can only do one thing per run
 - You can't mark a task done
-- The code is one lump, so adding features will make it messy
+- The code is one lump, so adding features will make it messy fast
 
-This module fixes those with lists, loops, dictionaries, and functions. It's the first time your program stores structured data, not just single values.
+This module fixes those with lists, dictionaries, and functions: the three tools every non-trivial program is built from, in one shape or another.
 
 \`\`\`note
 Your tasks disappear when the program exits. Saving them to a file comes in Project 3, and you'll use it again in the capstone.
@@ -52,147 +52,171 @@ Your tasks disappear when the program exits. Saving them to a file comes in Proj
       ),
     },
     {
-      id: "todo-lists",
-      title: "Lists",
-      content: `By the end of this lesson you'll be able to hold many values in one variable.
+      id: "todo-lists-and-looping",
+      title: "Lists, and looping over them",
+      content: `By the end of this lesson you'll be able to hold many values in one variable and do something with each of them.
 
 ## Making a list
 
-A list is an ordered collection in square brackets. It can hold any values, and it can change.
+A list is an ordered collection in square brackets. It can hold any values, and unlike a string, you can change it after you make it.
 
 \`\`\`python
-tasks = ["Buy milk", "Call Sam"]
-tasks.append("Write code")
+tasks = ["Buy milk", "Call Sam"]   # two strings, in order
 print(tasks)
 \`\`\`
 
-## Getting items out
+This is the fix for "it holds a single task" in \`todo.py\`: one variable, holding as many tasks as you add.
 
-Each item has a position, called an index, and counting starts at 0. \`tasks[0]\` is the first item and \`tasks[1]\` is the second. A negative index counts from the end, so \`tasks[-1]\` is the last one.
+## Getting items out by index
 
-Asking for an index that doesn't exist, like \`tasks[10]\` in a three-item list, raises an \`IndexError\`.
-
-## Useful list tools
-
-A method is a function that belongs to a value, called with a dot, like \`tasks.append(x)\`.
-
-- \`len(tasks)\` gives how many items there are
-- \`tasks.append(x)\` adds to the end
-- \`tasks.remove(x)\` removes the first item equal to \`x\`
-- \`tasks[0] = "New"\` replaces an item
-- \`"Buy milk" in tasks\` is \`True\` or \`False\`
-
-Lists that never change are called tuples, written with parentheses, like \`(1, 2)\`. You won't need them for this project.
-
-## Try it
-
-Start with an empty list, \`tasks = []\`, append two tasks, print its length, then print the last one.`,
-    },
-    {
-      id: "todo-loops-over-lists",
-      title: "Looping over a list",
-      content: `By the end of this lesson you'll be able to do something with every item in a list.
-
-## The for loop
-
-A \`for\` loop takes each item of a list in turn. Compare this with \`while\`, which repeats on a condition. Use \`for\` when you have a collection to walk through.
+Each item has a position, called an index, counting from 0, not 1. That's the single most common off-by-one bug in beginner code, so slow down here.
 
 \`\`\`python
-for task in tasks:
+tasks = ["Buy milk", "Call Sam", "Write code"]
+print(tasks[0])    # Buy milk: first item, index 0
+print(tasks[2])    # Write code: third item, index 2
+print(tasks[-1])   # Write code: negative counts from the end
+print(len(tasks))  # 3: how many items
+\`\`\`
+
+Ask for \`tasks[10]\` on a 3-item list and you get \`IndexError: list index out of range\`, not \`None\` or an empty string. Python refuses to guess.
+
+## Methods: functions that belong to a value
+
+A method is a function attached to a value, called with a dot, like \`tasks.append(...)\`. You've already used string methods without the name; \`.lower()\` in a future lesson works the same way. List methods change the list itself, rather than handing back a new one.
+
+\`\`\`python
+tasks = ["Buy milk"]
+
+tasks.append("Call Sam")     # adds to the end
+tasks.append("Write code")
+print(tasks)                  # ['Buy milk', 'Call Sam', 'Write code']
+
+tasks.remove("Call Sam")     # removes the first match, not by position
+print(tasks)                  # ['Buy milk', 'Write code']
+
+tasks[0] = "Buy oat milk"    # replace by index, no method needed
+print(tasks)                  # ['Buy oat milk', 'Write code']
+
+print("Write code" in tasks) # True: checks membership, doesn't search by index
+\`\`\`
+
+Lists that are never meant to change use parentheses instead of brackets and are called tuples, like \`(1, 2)\`. You won't need one for this project, but you'll see the word.
+
+## for: loop over every item
+
+\`for\` hands you each item of a collection in turn. Use it instead of \`while\` whenever you already have the collection and just want to walk through it.
+
+\`\`\`python
+tasks = ["Buy milk", "Call Sam", "Write code"]
+
+for task in tasks:     # "task" is your choice of name, holds one item per round
     print(task)
 \`\`\`
 
-The name after \`for\` is yours to choose. It holds the current item on each round.
+\`list\` in \`todo.py\` needs this to show more than one task at a time.
 
-## Numbering the items
+## Numbering as you go
 
-To print "1. Buy milk", you need a number as well as the item. \`enumerate\` hands you both, and \`start=1\` makes it count from 1:
+To print "1. Buy milk" you need a position as well as the item. \`enumerate\` hands you both at once, and \`start=1\` makes the count begin at 1 instead of 0 without you doing the math:
 
 \`\`\`python
+tasks = ["Buy milk", "Call Sam"]
+
 for number, task in enumerate(tasks, start=1):
     print(f"{number}. {task}")
+# 1. Buy milk
+# 2. Call Sam
 \`\`\`
+
+This numbering is exactly what \`todo.py\`'s \`list\` command prints.
 
 ## Empty lists
 
-A loop over an empty list simply does nothing. Because an empty list counts as false in a condition, you can check for it directly:
+A loop over an empty list runs zero times; it's not an error, it just does nothing. An empty list also counts as false in a condition, which gives you a clean check:
 
 \`\`\`python
-if not tasks:
+tasks = []
+if not tasks:        # true when the list is empty
     print("Nothing to do.")
 \`\`\`
 
+This exact check is what \`todo.py\`'s \`show\` prints on a brand new list, before the player has added anything.
+
 ## Try it
 
-Fill a list with three tasks and print them numbered. Then empty it (\`tasks = []\`) and confirm the message appears.`,
+- Build a three-item list, print it numbered from 1 with \`enumerate\`, then \`.remove()\` the middle one and print it again
+- Empty the list (\`tasks = []\`) and confirm your "Nothing to do." check fires`,
     },
     {
       id: "todo-dictionaries",
       title: "Dictionaries",
-      content: `By the end of this lesson you'll be able to store related facts about one thing together.
+      content: `By the end of this lesson you'll be able to store several facts about one thing together, under a single item.
 
-## The problem
+## The problem a list can't solve
 
-A task has two facts: its title and whether it's done. A list of strings can't hold both. A dictionary can.
-
-## Key-value pairs
-
-A dictionary maps keys to values, written in curly braces. You look a value up by its key, not by a position.
+A task has two facts: its title, and whether it's done. A list of strings has room for neither of those together. A dictionary maps a key to a value, so it can hold both under one item.
 
 \`\`\`python
-task = {"title": "Buy milk", "done": False}
-print(task["title"])
-task["done"] = True
+task = {"title": "Buy milk", "done": False}   # curly braces, key: value pairs
+print(task["title"])   # Buy milk: look up by key, not position
+task["done"] = True     # assigning to an existing key changes it
+task["priority"] = "high"   # assigning to a new key creates it
+print(task)
 \`\`\`
 
-Assigning to a key that exists changes it. Assigning to one that doesn't creates it. Asking for a missing key with \`task["priority"]\` raises a \`KeyError\`.
+This is the fix for "you can't mark a task done" in \`todo.py\`: each task becomes a dictionary with room for a \`done\` flag, not just a title.
 
-## Lists of dictionaries
+Ask for a key that isn't there, \`task["notes"]\`, and you get \`KeyError\`, the dictionary equivalent of a list's \`IndexError\`. \`"priority" in task\` checks safely first, and \`task.get("notes", "none")\` returns a fallback instead of crashing.
 
-Put dictionaries in a list, and you have a table: each dictionary is a row.
+## A list of dictionaries is a table
+
+Put dictionaries inside a list, and each dictionary is a row with the same shape.
 
 \`\`\`python
 tasks = [
     {"title": "Buy milk", "done": True},
     {"title": "Call Sam", "done": False},
 ]
+
+for task in tasks:
+    mark = "x" if task["done"] else " "   # a one-line if: pick "x" or a space
+    print(f"[{mark}] {task['title']}")
 \`\`\`
 
-## Handy tools
-
-- \`"priority" in task\` is \`True\` or \`False\`, and checks the keys
-- \`task.get("priority", "none")\` returns a default instead of crashing when the key is missing
-- \`task.keys()\` and \`task.values()\` list the parts
-- \`for key, value in task.items()\` loops over both
+That last line is worth pausing on: \`x if task["done"] else " "\` is a full \`if\`/\`else\` squeezed onto one line because it only needs to produce a value, not run a block.
 
 ## Try it
 
-Build the list above, then loop over it and print each title with an "x" if it's done and a space if not.`,
+- Build a list of 3 dictionaries shaped like \`{"title": ..., "done": ...}\`, then print each one's title with its mark, using the loop above
+- Change one task's \`"done"\` to \`True\` after the list exists, without retyping the whole dictionary`,
     },
     {
       id: "todo-functions",
-      title: "Functions",
-      content: `By the end of this lesson you'll be able to give a chunk of code a name and reuse it.
+      title: "Functions, and organizing the code",
+      content: `By the end of this lesson you'll be able to package repeated code into named, reusable pieces, and structure a whole program out of them.
 
 ## Why functions
 
-Your program will list tasks in more than one place. Copying the same six lines around is a bug waiting to happen. A function packages code under a name, so you write it once and call it whenever you need it.
-
-## Defining and calling
+Your program will build this same numbered display more than once. Copying the same lines around means fixing the same bug in two places later, if you remember to. A function names a chunk of code so you write it once and call it by name.
 
 \`\`\`python
-def add(tasks, title):
-    tasks.append({"title": title, "done": False})
+def show(tasks):                 # def starts a definition; tasks is a parameter
+    if not tasks:
+        print("Nothing to do.")
+    for number, task in enumerate(tasks, start=1):
+        mark = "x" if task["done"] else " "
+        print(f"{number}. [{mark}] {task['title']}")
 
-my_tasks = []
-add(my_tasks, "Buy milk")
+my_tasks = [{"title": "Buy milk", "done": False}]
+show(my_tasks)   # nothing runs inside show() until it's called, here
 \`\`\`
 
-\`def\` starts the definition. The names in parentheses are parameters, the inputs the function expects. The indented lines are its body, which only runs when you call it.
+The indented lines are the function's body. Nothing in them runs when Python reads the \`def\`; only a call like \`show(my_tasks)\` actually executes it, and it can be called as many times as you like. \`show\` is one of the actual functions that goes into \`todo.py\`.
 
 ## Returning a value
 
-A function can hand a result back with \`return\`:
+\`print\` isn't the only way for a function to communicate. \`return\` hands a value back to whatever called it, which is what lets you use a function's result in more code:
 
 \`\`\`python
 def count_done(tasks):
@@ -200,29 +224,22 @@ def count_done(tasks):
     for task in tasks:
         if task["done"]:
             total += 1
-    return total
+    return total   # hands the number back; doesn't print anything itself
+
+my_tasks = [{"title": "Buy milk", "done": True}, {"title": "Call Sam", "done": False}]
+print(f"{count_done(my_tasks)} of {len(my_tasks)} done")   # 1 of 2 done
 \`\`\`
 
-A function with no \`return\` gives back \`None\`, which just means "nothing".
+A function with no \`return\` hands back \`None\`, Python's way of saying "nothing here."
 
-## Try it
+## One job per function, and a main loop to tie them together
 
-Write \`show(tasks)\` that prints the numbered list, including "[x]" or "[ ]" for each task. Call it after adding two tasks.`,
-    },
-    {
-      id: "todo-organizing-the-code",
-      title: "Organizing the code",
-      content: `By the end of this lesson you'll be able to structure a program as small functions plus a main loop.
-
-## One job per function
-
-Each function should do one thing and be named for it. For this project, that gives \`show\`, \`add\`, and \`complete\`. When a bug appears, you know which function to look in.
-
-## The main loop
-
-Put the menu in a function called \`main\`. It reads a command, calls the right function, and repeats until the player quits.
+Give each function one job, named for it: \`add\`, \`show\`, \`complete\`. When something breaks, the name tells you where to look. Put the menu itself in a function called \`main\`, which reads a command and calls the right helper:
 
 \`\`\`python
+def add(tasks, title):
+    tasks.append({"title": title, "done": False})
+
 def main():
     tasks = []
     while True:
@@ -236,18 +253,15 @@ def main():
         else:
             print("Unknown command.")
 
-main()
+main()   # this line is what actually starts the program
 \`\`\`
 
-The call on the last line is what starts the program. The functions above it only define code, they don't run it.
-
-## Order matters
-
-Python must have seen a function's definition before you call it. Define your helpers first, and put \`main()\` at the bottom.
+Python must see a function's \`def\` before you call it, so define your helpers above \`main\`, and keep the \`main()\` call itself as the very last line of the file. This \`main\`, plus \`add\`, is the fix for "there's no menu, so you can only do one thing per run" in \`todo.py\`.
 
 ## Try it
 
-Add a \`complete(tasks, number)\` function and a \`done\` command. Remember that the player sees numbers starting at 1, but the list starts at 0.`,
+- Add a \`complete(tasks, number)\` function that sets \`tasks[number - 1]["done"] = True\`. Remember the player counts from 1, the list counts from 0
+- Wire a \`done\` command into the menu that calls it`,
     },
     {
       id: "todo-finish-the-project",
@@ -270,7 +284,7 @@ def add(tasks, title):
 
 
 def complete(tasks, number):
-    tasks[number - 1]["done"] = True
+    tasks[number - 1]["done"] = True   # player says 1, list index is 0
 
 
 def main():
@@ -286,13 +300,11 @@ def main():
         elif command == "quit":
             break
         else:
-            print("Unknown command.")
+            print("Unknown command.")   # keeps the menu alive on a typo
 
 
 main()
 \`\`\`
-
-The line \`mark = "x" if task["done"] else " "\` is a one-line \`if\`: it picks "x" when the task is done and a space otherwise.
 
 ## Done when
 
@@ -300,17 +312,19 @@ The line \`mark = "x" if task["done"] else " "\` is a one-line \`if\`: it picks 
 - \`list\` shows tasks numbered from 1, with \`[x]\` for done and \`[ ]\` for not done
 - \`done\` marks the task with that number as complete
 - An empty list prints "Nothing to do."
-- An unknown command prints "Unknown command." and keeps going
+- An unknown command prints "Unknown command." and the menu keeps running
 - \`quit\` ends the program
+- You can say, without checking, why \`complete\` subtracts 1 from the number the player typed
 
 ## Known problem
 
-Ask for \`done\` with a number that doesn't exist, and the program crashes with an \`IndexError\`. Project 3 shows how to handle that kind of error.
+Ask for \`done\` with a number that doesn't exist, and the program crashes with \`IndexError\`. Project 3 shows how to catch that instead of letting it kill the program.
 
 ## Stretch goals
 
-- Add a \`delete\` command
-- Show "2 of 5 done" after \`list\``,
+- Add a \`delete\` command using \`tasks.pop(number - 1)\`
+- Show "2 of 5 done" after \`list\`, using a function like \`count_done\` from this lesson
+- Store a due date alongside each task's title and done flag`,
     },
   ],
 };
