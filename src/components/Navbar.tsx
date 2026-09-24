@@ -1,16 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Logo from "./Logo";
 
 const NAV_LINKS = [
   { label: "Courses", href: "/courses" },
   { label: "Cheatsheets", href: "/cheatsheets" },
+  { label: "Dictionary", href: "/ai-coding-dictionary" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // The dictionary is a full-screen explorer with its own home button.
+  if (pathname === "/ai-coding-dictionary") return null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
