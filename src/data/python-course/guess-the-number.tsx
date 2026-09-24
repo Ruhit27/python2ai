@@ -70,11 +70,13 @@ name = "Ada"      # str: text, in quotes
 You can point a name at a new value at any time. The old value isn't remembered anywhere; Python just forgets it existed.
 
 \`\`\`python
-score = 10
-print(score)   # 10
-score = 20     # not "score equals 20", but "point score at 20 instead"
-print(score)   # 20
+attempts = 0
+print(attempts)   # 0
+attempts = 1       # not "attempts equals 1", but "point attempts at 1 instead"
+print(attempts)   # 1
 \`\`\`
+
+This is the exact counter you'll use in \`guess.py\` to fix "it doesn't count your tries": one variable, pointed at a new number each time round.
 
 ## Types
 
@@ -88,28 +90,30 @@ Every value has a type, which decides what you can do with it.
 \`\`\`python
 # type() tells you what you're actually holding, which matters once
 # variables start getting passed around and you lose track
-oven_temp = 350
-pizza_name = "Margherita"
-is_ready = False
+secret = 42
+hint = "Too high."
+guessed_correctly = False
 
-print(type(oven_temp))    # <class 'int'>
-print(type(pizza_name))   # <class 'str'>
-print(type(is_ready))     # <class 'bool'>
+print(type(secret))            # <class 'int'>
+print(type(hint))               # <class 'str'>
+print(type(guessed_correctly))  # <class 'bool'>
 \`\`\`
 
-Python is dynamically typed: nothing stops you from pointing \`oven_temp\` at \`"too hot"\` next. That's convenient, but it means you're the one keeping track of what a variable holds, not the language.
+These are the three types \`guess.py\` itself will hold. Python is dynamically typed: nothing stops you from pointing \`secret\` at \`"too hot"\` next. That's convenient, but it means you're the one keeping track of what a variable holds, not the language.
 
 ## Types don't mix on their own
 
 \`\`\`python
-age = "5" + 5
+guess = "5"        # this is exactly what input() hands back, even for digits
+secret = 42
+guess + secret       # TypeError, and you'll see exactly why in a moment
 \`\`\`
 
 This crashes with \`TypeError: can only concatenate str (not "int") to str\`. Python won't guess whether you meant to glue text together or add numbers, so it refuses both. Convert explicitly instead:
 
 \`\`\`python
-print(int("5") + 5)    # 10, both are numbers now
-print("5" + str(5))    # "55", both are text now
+print(int(guess) + secret)    # 47, both are numbers now
+print(guess + str(secret))    # "542", both are text now
 \`\`\`
 
 ## Printing and asking questions
@@ -117,8 +121,8 @@ print("5" + str(5))    # "55", both are text now
 \`print()\` writes to the terminal. \`input()\` shows a prompt, waits for the player to type and hit Enter, and hands back whatever they typed.
 
 \`\`\`python
-name = input("What's your name? ")   # waits here until Enter is pressed
-print("Hello,", name)                 # print takes several values, comma-separated
+guess = input("Your guess: ")   # waits here until Enter is pressed
+print("You guessed:", guess)     # print takes several values, comma-separated
 \`\`\`
 
 ## input() always gives you text
@@ -149,7 +153,7 @@ print(f"Got it in {attempts} attempts!")   # Got it in 3 attempts!
 print(f"That's {attempts * 2} if you count the ones you take back")
 \`\`\`
 
-Anything inside the braces is a real expression, not just a variable name, so \`{attempts * 2}\` works exactly like it looks.
+Anything inside the braces is a real expression, not just a variable name, so \`{attempts * 2}\` works exactly like it looks. This line is the other half of fixing "it doesn't count your tries" in \`guess.py\`: the counter from earlier, now shown to the player.
 
 ## Try it
 
@@ -179,6 +183,8 @@ else:
 # prints "Too high.": elif and else never even get evaluated once a branch matches
 \`\`\`
 
+This is the fix for "'Nope' doesn't tell you which direction to go" in \`guess.py\`: three branches instead of two, one for each way a guess can be wrong.
+
 ## Indentation is the block
 
 The lines under \`if\` are indented four spaces. That indentation, not braces or a keyword, is how Python knows which lines belong to which branch. Mix tabs and spaces, or indent inconsistently, and you get a syntax error before the program even runs. Let your editor's Tab key do this for you.
@@ -190,25 +196,27 @@ The lines under \`if\` are indented four spaces. That indentation, not braces or
 # <   less than        >   greater than
 # <=  less or equal    >=  greater or equal
 
-age = 20
-has_ticket = True
+guess = 150
+low, high = 1, 100
 
 # and: both sides must be true. or: at least one side. not: flips it.
-if age >= 18 and has_ticket:
-    print("Come on in.")
-if age < 13 or not has_ticket:
-    print("Not tonight.")
+if guess >= low and guess <= high:
+    print("Valid guess.")
+if guess < low or guess > high:
+    print("That's outside 1 to 100.")
 \`\`\`
+
+\`guess.py\` doesn't check this yet: it's one of the stretch goals at the end of this module.
 
 ## while: repeat on a condition
 
 \`while\` keeps running its block as long as the condition is true, checked fresh each time round.
 
 \`\`\`python
-count = 0
-while count < 3:      # checked before every round, including the first
-    print(count)       # 0, 1, 2
-    count = count + 1   # forget this line and the loop never ends
+attempts = 0
+while attempts < 3:      # checked before every round, including the first
+    print(attempts)       # 0, 1, 2
+    attempts = attempts + 1   # forget this line and the loop never ends
 \`\`\`
 
 If the condition never turns false, the loop runs until you kill it with Ctrl+C in the terminal. That's usually a bug, not a feature.
@@ -229,7 +237,7 @@ while True:   # loop forever, or at least until break fires: like a gym membersh
     print("Not quite.")
 \`\`\`
 
-\`break\` exits the loop immediately, skipping anything else in its body. Nothing after \`while True:\` runs again until it fires.
+\`break\` exits the loop immediately, skipping anything else in its body. Nothing after \`while True:\` runs again until it fires. This is the fix for "you get exactly one guess" in \`guess.py\`: everything now repeats until the player actually wins.
 
 ## Try it
 
@@ -251,7 +259,11 @@ import random
 secret = random.randint(1, 100)   # random.randint: a tool that lives inside random
 \`\`\`
 
-## random: for anything unpredictable
+This is the fix for "the secret is always 42": one line, in \`guess.py\`, replacing the hardcoded number.
+
+## random has more tools than randint
+
+\`guess.py\` only needs \`randint\`, but \`random\` has other tools you'll run into elsewhere. Not part of this project, just good to recognize:
 
 \`\`\`python
 import random
@@ -329,6 +341,7 @@ Yours doesn't have to match this exactly. It has to do the same things, for the 
 
 ## Stretch goals
 
+- Reject a guess outside 1 to 100 with the \`and\`/\`or\` check from the decisions lesson, and ask again instead of counting it
 - Tell the player when they've guessed the same number twice (hint: you'll want a list, coming in Project 2)
 - Add a limit of 7 guesses using a second loop condition, and reveal the secret if they run out
 - Ask "Play again?" after a game ends, and loop the whole game if they say yes`,

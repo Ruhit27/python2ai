@@ -20,6 +20,10 @@ _Avoid_: Skill, tool, bot, feature
 The Agent that, once a day, gathers what changed in AI and developer tooling from official changelogs and developer communities, and groups it by theme with a link to every source.
 _Avoid_: Newsletter, feed, news
 
+**Learn this**:
+The Agent that takes any topic a Developer names and returns a short explanation, a 3–5 step study plan, and links to matching lessons and glossary entries on the site.
+_Avoid_: Tutor, explainer, course
+
 **Dependency check**:
 The Agent that takes a Developer's list of dependencies and explains what has changed in newer versions of each.
 _Avoid_: Audit, scan, upgrade
@@ -41,8 +45,8 @@ A half-working starting point of a module project, shown at the start of the mod
 _Avoid_: Starter code, skeleton
 
 **Worked example**:
-A short, fully commented code snippet inside a lesson that demonstrates one idea in isolation, using its own throwaway names. Separate from the module project's own code, which stays uncluttered because it's the thing the learner ships.
-_Avoid_: Mini-snippet, demo, exercise
+A short, fully commented code snippet inside a lesson that teaches one idea using the module project's own names and situation, usually named as the fix for a specific thing wrong with the project's rough version. A snippet that teaches syntax the project itself never uses is called out explicitly as going beyond the project, rather than left looking like part of it.
+_Avoid_: Mini-snippet, demo, exercise, throwaway example
 
 **Sample run**:
 The exact output a finished project produces for a given input, shown at the start so the learner has a target.

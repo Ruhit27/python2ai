@@ -59,24 +59,24 @@ This module covers strings, files, and error handling: the three things almost e
 Like lists, strings come with built-in methods, called with a dot. Unlike list methods such as \`.append()\`, string methods never change the original string: they hand back a new one, so you have to keep the result.
 
 \`\`\`python
-text = "  Hello, World!  "
+text = "Hello, world! Hello again."   # the start of sample.txt
 clean = text.strip().lower()   # each method runs on the result of the one before it
-print(text)    # unchanged: "  Hello, World!  "
-print(clean)   # "hello, world!"
+print(text)    # unchanged: "Hello, world! Hello again."
+print(clean)   # "hello, world! hello again."
 \`\`\`
 
-Chaining \`.strip().lower()\` like that reads right to left in effect but left to right on the page: strip the whitespace first, then lowercase what's left.
+Chaining \`.strip().lower()\` like that reads right to left in effect but left to right on the page: strip the whitespace first, then lowercase what's left. This is the start of the fix for "'Hello,' and 'hello' count as different words" in \`words.py\`: lowercase both, and they match.
 
 ## Methods you'll use here
 
 \`\`\`python
-text = "  Hello, World!  "
+text = "  Hello, world!  "
 
 print(text.lower())               # "  hello, world!  "
-print(text.strip())               # "Hello, World!": outer whitespace only
-print(text.strip().split())       # ['Hello,', 'World!']: cuts on whitespace
+print(text.strip())               # "Hello, world!": outer whitespace only
+print(text.strip().split())       # ['Hello,', 'world!']: cuts on whitespace, this is where "words" comes from
 print("-".join(["a", "b", "c"]))  # "a-b-c": the reverse of split
-print(text.replace("l", "L"))     # "  HeLLo, WorLd!  "
+print(text.replace("l", "L"))     # "  HeLLo, worLd!  "
 \`\`\`
 
 ## Stripping punctuation specifically
@@ -91,14 +91,14 @@ word = "Hello,".lower().strip(string.punctuation)
 print(word)   # "hello": comma's gone, "hello" itself is untouched
 \`\`\`
 
-\`string.punctuation\` is just a string someone already typed out for you, sitting inside the \`string\` module, so you don't have to.
+\`string.punctuation\` is just a string someone already typed out for you, sitting inside the \`string\` module, so you don't have to. This \`.strip(string.punctuation)\` call is the rest of the fix for "'Hello,' and 'hello' count as different words" in \`words.py\`: the comma comes off too, not just the case.
 
 ## Counting with a dictionary
 
 Project 2 used a dictionary to hold facts about one task. Here, the keys are words and the values are counts, which is one of the most common dictionary shapes you'll write.
 
 \`\`\`python
-words = ["the", "cat", "sat", "on", "the", "mat"]
+words = ["hello", "world", "hello", "again"]   # already lowercased and split
 counts = {}
 
 for word in words:
@@ -106,8 +106,10 @@ for word in words:
     # without this, brand new words would crash with KeyError
     counts[word] = counts.get(word, 0) + 1
 
-print(counts)   # {'the': 2, 'cat': 1, 'sat': 1, 'on': 1, 'mat': 1}
+print(counts)   # {'hello': 2, 'world': 1, 'again': 1}
 \`\`\`
+
+This loop, on \`words\` and \`counts\`, is the fix for "it only reports a total, not which words are common" in \`words.py\`.
 
 ## Try it
 
@@ -130,7 +132,7 @@ with open("sample.txt", encoding="utf-8") as file:
 # the file is already closed here, even though the code never said so
 \`\`\`
 
-\`encoding="utf-8"\` tells Python how to turn the file's raw bytes into characters. Leave it out and text with accents or emoji can come out garbled on some systems. Just always include it.
+\`encoding="utf-8"\` tells Python how to turn the file's raw bytes into characters. Leave it out and text with accents or emoji can come out garbled on some systems. Just always include it. This \`with\` block is the fix for "the file is never explicitly closed" in \`words.py\`.
 
 ## A plain filename is relative to where you ran the command
 
@@ -162,7 +164,7 @@ with open("report.txt", "w", encoding="utf-8") as file:
     file.write("7 different\\n")
 \`\`\`
 
-\`"a"\` (append) is the other common mode: it adds to the end and keeps what was already there, instead of erasing it.
+This is the start of the fix for "it never saves anything" in \`words.py\`: writing to \`report.txt\`, not just printing to the screen. \`"a"\` (append) is the other common mode: it adds to the end and keeps what was already there, instead of erasing it.
 
 ## Building a report in one write
 
@@ -196,7 +198,7 @@ Files go missing. Players type nonsense. Python signals a problem by raising an 
 Put the risky line inside \`try\`. If it raises the exact error named after \`except\`, Python jumps there instead of crashing the program.
 
 \`\`\`python
-filename = "missing.txt"
+filename = input("File to analyze: ")
 
 try:
     with open(filename, encoding="utf-8") as file:
@@ -204,6 +206,8 @@ try:
 except FileNotFoundError:
     print(f"Can't find {filename}.")   # this runs; the program keeps going
 \`\`\`
+
+This is the fix for "a mistyped filename crashes it with a raw traceback" in \`words.py\`.
 
 ## Name the error you expect
 

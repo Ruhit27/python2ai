@@ -65,6 +65,8 @@ tasks = ["Buy milk", "Call Sam"]   # two strings, in order
 print(tasks)
 \`\`\`
 
+This is the fix for "it holds a single task" in \`todo.py\`: one variable, holding as many tasks as you add.
+
 ## Getting items out by index
 
 Each item has a position, called an index, counting from 0, not 1. That's the single most common off-by-one bug in beginner code, so slow down here.
@@ -112,6 +114,8 @@ for task in tasks:     # "task" is your choice of name, holds one item per round
     print(task)
 \`\`\`
 
+\`list\` in \`todo.py\` needs this to show more than one task at a time.
+
 ## Numbering as you go
 
 To print "1. Buy milk" you need a position as well as the item. \`enumerate\` hands you both at once, and \`start=1\` makes the count begin at 1 instead of 0 without you doing the math:
@@ -125,6 +129,8 @@ for number, task in enumerate(tasks, start=1):
 # 2. Call Sam
 \`\`\`
 
+This numbering is exactly what \`todo.py\`'s \`list\` command prints.
+
 ## Empty lists
 
 A loop over an empty list runs zero times; it's not an error, it just does nothing. An empty list also counts as false in a condition, which gives you a clean check:
@@ -134,6 +140,8 @@ tasks = []
 if not tasks:        # true when the list is empty
     print("Nothing to do.")
 \`\`\`
+
+This exact check is what \`todo.py\`'s \`show\` prints on a brand new list, before the player has added anything.
 
 ## Try it
 
@@ -156,6 +164,8 @@ task["done"] = True     # assigning to an existing key changes it
 task["priority"] = "high"   # assigning to a new key creates it
 print(task)
 \`\`\`
+
+This is the fix for "you can't mark a task done" in \`todo.py\`: each task becomes a dictionary with room for a \`done\` flag, not just a title.
 
 Ask for a key that isn't there, \`task["notes"]\`, and you get \`KeyError\`, the dictionary equivalent of a list's \`IndexError\`. \`"priority" in task\` checks safely first, and \`task.get("notes", "none")\` returns a fallback instead of crashing.
 
@@ -202,7 +212,7 @@ my_tasks = [{"title": "Buy milk", "done": False}]
 show(my_tasks)   # nothing runs inside show() until it's called, here
 \`\`\`
 
-The indented lines are the function's body. Nothing in them runs when Python reads the \`def\`; only a call like \`show(my_tasks)\` actually executes it, and it can be called as many times as you like.
+The indented lines are the function's body. Nothing in them runs when Python reads the \`def\`; only a call like \`show(my_tasks)\` actually executes it, and it can be called as many times as you like. \`show\` is one of the actual functions that goes into \`todo.py\`.
 
 ## Returning a value
 
@@ -246,7 +256,7 @@ def main():
 main()   # this line is what actually starts the program
 \`\`\`
 
-Python must see a function's \`def\` before you call it, so define your helpers above \`main\`, and keep the \`main()\` call itself as the very last line of the file.
+Python must see a function's \`def\` before you call it, so define your helpers above \`main\`, and keep the \`main()\` call itself as the very last line of the file. This \`main\`, plus \`add\`, is the fix for "there's no menu, so you can only do one thing per run" in \`todo.py\`.
 
 ## Try it
 

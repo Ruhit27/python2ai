@@ -63,9 +63,11 @@ from datetime import date        # date.today(): pulled one name out directly
 import json as js                # js.dumps(...): given a shorter local name
 \`\`\`
 
+Weather Now itself only needs one import, \`import requests\`, the plain first form. These other two forms are here so you recognize them: you'll use \`from datetime import date\` and \`import json\` for real in the capstone.
+
 ## Your own files are modules too
 
-A file \`helpers.py\` sitting next to your script, containing \`def shout(text): return text.upper()\`, can be pulled in with \`from helpers import shout\`. Splitting a program across files this way, instead of one growing script, is how real projects stay navigable once they get past a couple hundred lines.
+A file \`helpers.py\` sitting next to your script, containing \`def shout(text): return text.upper()\`, can be pulled in with \`from helpers import shout\`. Splitting a program across files this way, instead of one growing script, is how real projects stay navigable once they get past a couple hundred lines. Weather Now itself stays small enough to live in one file, so you won't split it, but it's worth knowing this exists once your own projects grow past this course.
 
 ## Packages need installing before you can import them
 
@@ -151,6 +153,8 @@ An API is a way for programs to talk to each other. You send a request to a web 
 
 ## Your first request
 
+This is the request \`find_city\` in \`weather.py\` sends, one piece at a time:
+
 \`\`\`python
 import requests
 
@@ -215,7 +219,7 @@ The \`json\` module does the same conversion for data you make yourself, not jus
 \`\`\`python
 import json
 
-data = {"visits": 3, "favorite_city": "Berlin"}
+data = {"Read": ["2026-09-24"]}   # a habit name mapped to the dates it was done: the exact shape the capstone will save
 
 with open("data.json", "w", encoding="utf-8") as file:
     json.dump(data, file, indent=2)   # indent=2 just makes the file readable
@@ -223,7 +227,7 @@ with open("data.json", "w", encoding="utf-8") as file:
 with open("data.json", encoding="utf-8") as file:
     reloaded = json.load(file)
 
-print(reloaded)   # {'visits': 3, 'favorite_city': 'Berlin'}
+print(reloaded)   # {'Read': ['2026-09-24']}
 \`\`\`
 
 You'll use exactly this pair in the capstone, to save a learner's habits between runs.
