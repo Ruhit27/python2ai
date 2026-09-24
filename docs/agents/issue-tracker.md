@@ -1,30 +1,40 @@
-# Issue tracker: Local Markdown
+# Issue tracker: GitHub
 
-Issues and specs for this repo live as markdown files in `.scratch/`.
+Issues and specs for this repo live as GitHub issues on `Ruhit27/python2ai`. Use the `gh` CLI for every operation.
 
 ## Conventions
 
-- One feature per directory: `.scratch/<feature-slug>/`
-- The spec is `.scratch/<feature-slug>/spec.md`
-- Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
-- Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+- **Read an issue**: `gh issue view <number> --comments`.
+- **List issues**: `gh issue list --state open --json number,title,body,labels,comments`, with `--label` and `--state` filters as needed.
+- **Comment on an issue**: `gh issue comment <number> --body "..."`.
+- **Apply or remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`. Label strings come from `triage-labels.md`.
+- **Close an issue**: `gh issue close <number> --comment "..."`.
+
+The repo is inferred from `git remote -v`, so `gh` works without `--repo` inside this clone.
+
+## Specs and implementation issues
+
+- A feature's spec is one issue, labelled `spec`.
+- Implementation issues are one issue per ticket, never a single combined tickets issue. Each links back to its spec with `Part of #<spec-number>` in the body, and the spec lists its tickets as a task list (`- [ ] #<number>`).
+- Triage state is recorded with a label (see `triage-labels.md`), not in the body.
+- Conversation history lives in issue comments.
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).
+Create a GitHub issue.
 
 ## When a skill says "fetch the relevant ticket"
 
-Read the file at the referenced path. The user will normally pass the path or the issue number directly.
+Run `gh issue view <number> --comments`. The user will normally pass the issue number or URL directly.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
+Used by `/wayfinder`. The **map** is one issue with one **child** issue per ticket.
 
-- **Map**: `.scratch/<effort>/map.md` (the Notes / Decisions-so-far / Fog body).
-- **Child ticket**: `.scratch/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
-- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
-- **Frontier**: scan `.scratch/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
-- **Claim**: set `Status: claimed` and save before any work.
-- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
+- **Map**: an issue labelled `map` whose body holds the Notes / Decisions-so-far / Fog sections.
+- **Child ticket**: an issue with the question in the body and `Part of #<map-number>`. A `type:<research|prototype|grilling|task>` label records the ticket type. The map's body lists its children as a task list.
+- **Blocking**: a `Blocked by: #NN, #NN` line at the top of the body. A ticket is unblocked when every issue it lists is closed.
+- **Frontier**: open, unblocked children of the map with no assignee; lowest issue number wins.
+- **Claim**: `gh issue edit <number> --add-assignee @me` before any work.
+- **Resolve**: post the answer as a comment starting with `## Answer`, close the issue, then append a context pointer (gist + link) to the map's Decisions-so-far with `gh issue edit <map-number> --body-file ...`.
