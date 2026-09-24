@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowUpRight, ChevronRight, FileText, Folder, Loader2, X } from "lucide-react";
+import { ArrowUpRight, ChevronRight, FileText, Folder, House, Loader2, X } from "lucide-react";
 import {
   DAILY_LIMIT,
   type AgentId,
@@ -535,7 +535,7 @@ export default function AgenticOs() {
   const coreState: CoreState = busy ? "thinking" : answering ? "answering" : "idle";
 
   return (
-    <div className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden bg-[#02050a] text-cyan-50">
+    <div className="relative h-dvh w-full overflow-hidden bg-[#02050a] text-cyan-50">
       {/* On wide screens the scene narrows so the open Agent isn't hidden under its panel. */}
       <div className={`absolute inset-y-0 left-0 transition-[right] duration-500 ${selected ? "right-0 md:right-[464px]" : "right-0"}`}>
         <JarvisScene state={coreState} selected={selected} onSelect={select} />
@@ -544,7 +544,14 @@ export default function AgenticOs() {
       {/* Scanlines */}
       <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(34,211,238,0.035)_0px,rgba(34,211,238,0.035)_1px,transparent_1px,transparent_4px)]" />
 
-      <div className="pointer-events-none absolute left-4 top-4 z-10 max-w-sm md:left-6 md:top-6">
+      <div className="absolute left-4 top-4 z-10 max-w-sm md:left-6 md:top-6">
+        <Link
+          href="/"
+          aria-label="Home"
+          className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-cyan-400/30 bg-[#03101a]/70 text-cyan-200 backdrop-blur transition-colors hover:border-cyan-300/70 hover:text-cyan-50"
+        >
+          <House size={18} />
+        </Link>
         <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan-300/70">python2ai · public demo</p>
         <h1 className="mt-2 font-mono text-2xl font-semibold uppercase tracking-[0.25em] text-cyan-50 drop-shadow-[0_0_12px_rgba(34,211,238,0.6)] md:text-3xl">
           Agentic OS
