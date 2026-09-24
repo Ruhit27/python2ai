@@ -59,13 +59,11 @@ export function splitEntry(body: string) {
 export function DictionaryBody({
   body,
   onOpen,
-  collapsed = false,
 }: {
   body: string;
   onOpen: (slug: string) => void;
-  collapsed?: boolean;
 }) {
-  const blocks = collapsed ? body.split(/\n{2,}/).slice(0, 1) : body.split(/\n{2,}/);
+  const blocks = body.split(/\n{2,}/);
   const nodes: ReactNode[] = blocks.map((block, i) => {
     const lines = block.split("\n");
     if (lines.length > 2 && lines.every((l) => l.trim().startsWith("|"))) {

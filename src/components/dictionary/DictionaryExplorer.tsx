@@ -4,10 +4,11 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import MiniSearch from "minisearch";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, ChevronDown, House, Info, Search, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, House, Info, List, Network, Palette, Pause, Play, Search, SkipBack, SkipForward, Volume2, VolumeX, X } from "lucide-react";
 import type { DictionaryData } from "@/lib/dictionary";
 import { DictionaryBody, inline, splitEntry } from "@/lib/dictionary-content";
 import type { LabelData } from "./DictionaryGraph";
+import { SECTION_COLORS } from "./colors";
 import { playSelect, setSoundEnabled } from "./sound";
 
 const DictionaryGraph = dynamic(() => import("./DictionaryGraph"), {
@@ -65,6 +66,103 @@ function GraphLabels({ titles, data }: { titles: string[]; data: LabelData }) {
   );
 }
 
+/** Wraps each search term found in `text` in a bold underline. */
+function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
+  if (!tokens.length) return <>{text}</>;
+  const pattern = tokens.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  return (
+    <>
+      {text.split(new RegExp(`(${pattern})`, "gi")).map((part, i) =>
+        i % 2 ? (
+          <mark key={i} className="bg-transparent font-bold text-inherit underline decoration-2 underline-offset-2">
+            {part}
+          </mark>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/** Every term as a plain list, grouped by section or alphabetically. */
+function TermList({
+  data,
+  mode,
+  onMode,
+  selected,
+  onPick,
+}: {
+  data: DictionaryData;
+  mode: "section" | "alpha";
+  onMode: (mode: "section" | "alpha") => void;
+  selected: string | null;
+  onPick: (slug: string) => void;
+}) {
+  const groups =
+    mode === "section"
+      ? data.sections.map((section, i) => ({
+          title: section.title,
+          terms: data.terms.filter((t) => t.section === i),
+        }))
+      : Object.entries(
+          [...data.terms]
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .reduce<Record<string, DictionaryData["terms"]>>((acc, t) => {
+              (acc[t.title[0].toUpperCase()] ??= []).push(t);
+              return acc;
+            }, {}),
+        ).map(([title, terms]) => ({ title, terms }));
+
+  return (
+    <div className="mx-auto max-w-2xl px-6 pb-16 pt-24">
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <h2 className="text-3xl font-extrabold tracking-tighter">All terms</h2>
+        <div role="group" aria-label="Group terms" className="flex rounded-full border border-black/25 p-0.5 text-xs">
+          {(
+            [
+              ["section", "By section"],
+              ["alpha", "A–Z"],
+            ] as const
+          ).map(([value, text]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={mode === value}
+              onClick={() => onMode(value)}
+              className={`cursor-pointer rounded-full px-3 py-1.5 transition-colors ${
+                mode === value ? "bg-[#1a1a1a] text-white" : "hover:bg-black/10"
+              }`}
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+      </div>
+      {groups.map((group) => (
+        <section key={group.title} className="mb-8">
+          <p className={label}>{group.title}</p>
+          <ul className="mt-2">
+            {group.terms.map((t) => (
+              <li key={t.slug} className="border-b border-black/10">
+                <button
+                  type="button"
+                  onClick={() => onPick(t.slug)}
+                  aria-current={t.slug === selected}
+                  className="flex w-full cursor-pointer flex-col gap-0.5 px-2 py-3 text-left transition-colors hover:bg-black/5"
+                >
+                  <span className="text-[17px] font-semibold">{t.title}</span>
+                  <span className="line-clamp-2 text-sm text-black/60">{t.description}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function LoadingScreen() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5 bg-[#ecebe8] text-[#1a1a1a]">
@@ -81,8 +179,13 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
+  const [colorMode, setColorMode] = useState<"mono" | "section">("mono");
+  const [touring, setTouring] = useState(false);
+  const [activeResult, setActiveResult] = useState(0);
+  const [listOpen, setListOpen] = useState(false);
+  const [listMode, setListMode] = useState<"section" | "alpha">("section");
+  const [showHint, setShowHint] = useState(false);
   const panelScroll = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLElement>(null);
   const [insetRight, setInsetRight] = useState(0);
@@ -96,8 +199,10 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
   const select = useCallback((slug: string | null) => {
     setSelected(slug);
     if (slug) playSelect();
-    setExpanded(false);
+    else setTouring(false);
     setSearchOpen(false);
+    setQuery("");
+    setListOpen(false);
     const url = new URL(window.location.href);
     if (slug) url.searchParams.set("term", slug);
     else url.searchParams.delete("term");
@@ -127,10 +232,13 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
     return ms;
   }, [data]);
 
-  const matches = useMemo(
-    () => (query.trim() ? new Set(search.search(query).map((r) => r.id as string)) : null),
+  // Ranked best-first, so arrow keys and Enter follow relevance.
+  const ranked = useMemo(
+    () => (query.trim() ? search.search(query).map((r) => r.id as string) : null),
     [search, query],
   );
+  const matches = useMemo(() => (ranked ? new Set(ranked) : null), [ranked]);
+  const tokens = useMemo(() => query.trim().split(/\s+/).filter(Boolean), [query]);
 
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("term");
@@ -153,6 +261,45 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
       window.localStorage.setItem("dictionary-sound", soundOn ? "on" : "off");
     } catch {}
   }, [soundOn]);
+
+  // One-line tip until the visitor first interacts; never shown again after.
+  useEffect(() => {
+    let seen = false;
+    try {
+      seen = window.localStorage.getItem("glossary-hint") === "seen";
+    } catch {}
+    if (seen) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the stored flag is only readable after hydration
+    setShowHint(true);
+    const events = ["pointerdown", "wheel", "keydown"] as const;
+    const hide = () => {
+      setShowHint(false);
+      try {
+        window.localStorage.setItem("glossary-hint", "seen");
+      } catch {}
+      events.forEach((name) => window.removeEventListener(name, hide));
+    };
+    events.forEach((name) => window.addEventListener(name, hide));
+    return () => events.forEach((name) => window.removeEventListener(name, hide));
+  }, []);
+
+  useEffect(() => {
+    document.getElementById(`search-result-${activeResult}`)?.scrollIntoView({ block: "nearest" });
+  }, [activeResult, query]);
+
+  // Guided tour: fly through the terms in curriculum order, pausing on each.
+  useEffect(() => {
+    if (!touring) return;
+    const index = selected ? data.terms.findIndex((t) => t.slug === selected) : -1;
+    const next = data.terms[index + 1];
+    if (!next) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the tour ends after the last term
+      setTouring(false);
+      return;
+    }
+    const timer = setTimeout(() => select(next.slug), index < 0 ? 0 : 7500);
+    return () => clearTimeout(timer);
+  }, [touring, selected, data.terms, select]);
 
   // On wide screens the panel sits beside the graph; on narrow ones it is a
   // bottom sheet and covers nothing on the right.
@@ -180,6 +327,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
       if (e.key !== "Escape") return;
       setSearchOpen(false);
       setInfoOpen(false);
+      setListOpen(false);
       select(null);
     };
     window.addEventListener("keydown", onKey);
@@ -192,7 +340,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
   const next = index >= 0 && index < data.terms.length - 1 ? data.terms[index + 1] : null;
   const entry = term ? splitEntry(term.body) : null;
   const related = term ? term.links.map((s) => bySlug.get(s)!) : [];
-  const results = matches ? data.terms.filter((t) => matches.has(t.slug)) : [];
+  const results = ranked ? ranked.map((slug) => bySlug.get(slug)!) : [];
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-[#ecebe8] text-[#1a1a1a]">
@@ -200,6 +348,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
         <div className="absolute inset-0">
           <DictionaryGraph
             insetRight={insetRight}
+            colorMode={colorMode}
             labelData={labelData}
             terms={data.terms}
             connections={connections}
@@ -215,10 +364,90 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
           style={{ backgroundImage: GRAIN }}
         />
 
-        <div className="absolute left-6 top-6 flex items-start gap-2">
+        {touring && (
+          <div
+            role="progressbar"
+            aria-label="Guided tour progress"
+            aria-valuemin={1}
+            aria-valuemax={data.terms.length}
+            aria-valuenow={Math.max(index + 1, 1)}
+            className="absolute left-0 top-0 z-30 h-[3px] bg-black/10 transition-[right] duration-300"
+            style={{ right: insetRight }}
+          >
+            <div
+              className="h-full bg-[#1a1a1a] transition-[width] duration-700"
+              style={{ width: `${((index + 1) / data.terms.length) * 100}%` }}
+            />
+          </div>
+        )}
+
+        {listOpen && (
+          <div
+            className="absolute inset-y-0 left-0 z-20 overflow-y-auto bg-[#ecebe8]/95 backdrop-blur transition-[right] duration-300"
+            style={{ right: insetRight }}
+          >
+            <TermList data={data} mode={listMode} onMode={setListMode} selected={selected} onPick={select} />
+          </div>
+        )}
+
+        <p
+          aria-hidden
+          className={`pointer-events-none absolute bottom-6 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-black/20 bg-[#ecebe8]/80 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] backdrop-blur transition-opacity duration-700 ${
+            showHint && !selected && !listOpen ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ left: `calc(50% - ${insetRight / 2}px)` }}
+        >
+          Drag to orbit · Scroll to zoom · Click a term
+        </p>
+
+        <div className="absolute left-6 top-6 z-30 flex items-start gap-2">
           <Link href="/" aria-label="Home" className={circleButton}>
             <House size={18} />
           </Link>
+          <button
+            type="button"
+            aria-label={touring ? "Pause guided tour" : "Start guided tour"}
+            title={touring ? "Pause guided tour" : "Start guided tour"}
+            aria-pressed={touring}
+            onClick={() => setTouring((v) => !v)}
+            className={circleButton}
+          >
+            {touring ? <Pause size={18} /> : <Play size={18} />}
+          </button>
+          {touring && (
+            <>
+              <button
+                type="button"
+                aria-label="Previous term"
+                title="Previous term"
+                disabled={!prev}
+                onClick={() => prev && select(prev.slug)}
+                className={`${circleButton} disabled:cursor-default disabled:opacity-40`}
+              >
+                <SkipBack size={18} />
+              </button>
+              <button
+                type="button"
+                aria-label="Next term"
+                title="Next term"
+                disabled={!next}
+                onClick={() => next && select(next.slug)}
+                className={`${circleButton} disabled:cursor-default disabled:opacity-40`}
+              >
+                <SkipForward size={18} />
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            aria-label={listOpen ? "Back to the graph" : "Browse terms as a list"}
+            title={listOpen ? "Back to the graph" : "Browse terms as a list"}
+            aria-pressed={listOpen}
+            onClick={() => setListOpen((v) => !v)}
+            className={circleButton}
+          >
+            {listOpen ? <Network size={18} /> : <List size={18} />}
+          </button>
           <div className="flex flex-col gap-2">
           {searchOpen ? (
             <div className="w-72 max-w-[calc(100vw-3rem)]">
@@ -227,7 +456,25 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
                 <input
                   autoFocus
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setActiveResult(0);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setActiveResult((a) => Math.min(a + 1, results.length - 1));
+                    } else if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setActiveResult((a) => Math.max(a - 1, 0));
+                    } else if (e.key === "Enter" && results[activeResult]) {
+                      select(results[activeResult].slug);
+                    }
+                  }}
+                  role="combobox"
+                  aria-expanded={matches !== null}
+                  aria-controls="search-results"
+                  aria-activedescendant={results.length ? `search-result-${activeResult}` : undefined}
                   placeholder="Search the dictionary"
                   aria-label="Search the dictionary"
                   className="w-full bg-transparent text-sm outline-none placeholder:text-black/40"
@@ -245,16 +492,29 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
                 </button>
               </div>
               {matches && (
-                <ul className="mt-2 max-h-64 overflow-y-auto rounded-2xl border border-black/25 bg-[#ecebe8]/95 py-1 text-sm backdrop-blur">
+                <ul
+                  id="search-results"
+                  role="listbox"
+                  className="mt-2 max-h-72 overflow-y-auto rounded-2xl border border-black/25 bg-[#ecebe8]/95 py-1 text-sm backdrop-blur"
+                >
                   {results.length === 0 && <li className="px-4 py-2 opacity-60">No matches</li>}
-                  {results.map((t) => (
-                    <li key={t.slug}>
+                  {results.map((t, i) => (
+                    <li key={t.slug} id={`search-result-${i}`} role="option" aria-selected={i === activeResult}>
                       <button
                         type="button"
+                        tabIndex={-1}
                         onClick={() => select(t.slug)}
-                        className="w-full cursor-pointer px-4 py-1.5 text-left hover:bg-black/10"
+                        onMouseMove={() => setActiveResult(i)}
+                        className={`flex w-full cursor-pointer flex-col px-4 py-1.5 text-left ${
+                          i === activeResult ? "bg-black/10" : ""
+                        }`}
                       >
-                        {t.title}
+                        <span>
+                          <Highlight text={t.title} tokens={tokens} />
+                        </span>
+                        <span className="line-clamp-1 text-xs text-black/55">
+                          <Highlight text={t.description} tokens={tokens} />
+                        </span>
                       </button>
                     </li>
                   ))}
@@ -274,7 +534,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
           </div>
         </div>
 
-        <div className="absolute top-6 transition-[right] duration-300" style={{ right: insetRight + 24 }}>
+        <div className="absolute top-6 z-30 transition-[right] duration-300" style={{ right: insetRight + 24 }}>
           <button
             type="button"
             aria-label="About this dictionary"
@@ -313,10 +573,36 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
 
         <button
           type="button"
+          aria-label={colorMode === "section" ? "Use grey nodes" : "Color nodes by section"}
+          title={colorMode === "section" ? "Use grey nodes" : "Color nodes by section"}
+          aria-pressed={colorMode === "section"}
+          onClick={() => setColorMode((m) => (m === "section" ? "mono" : "section"))}
+          className={`${circleButton} absolute bottom-6 z-30 transition-[right] duration-300`}
+          style={{ right: insetRight + 24 + 52 }}
+        >
+          <Palette size={18} />
+        </button>
+
+        {colorMode === "section" && (
+          <ul className="pointer-events-none absolute bottom-16 left-6 hidden flex-col gap-1 text-[11px] sm:flex">
+            {data.sections.map((section, i) => (
+              <li key={section.title} className="flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ background: SECTION_COLORS[i % SECTION_COLORS.length] }}
+                />
+                {section.title}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <button
+          type="button"
           aria-label={soundOn ? "Mute sound" : "Turn sound on"}
           aria-pressed={soundOn}
           onClick={() => setSoundOn((v) => !v)}
-          className={`${circleButton} absolute bottom-6 transition-[right] duration-300`}
+          className={`${circleButton} absolute bottom-6 z-30 transition-[right] duration-300`}
           style={{ right: insetRight + 24 }}
         >
           {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -346,7 +632,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
         <aside
           ref={panel}
           aria-label={term.title}
-          className="absolute inset-x-0 bottom-0 z-10 flex max-h-[80%] flex-col border-t border-black/20 bg-[#f4f3f1] lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:bottom-auto lg:max-h-none lg:w-[42%] lg:min-w-[420px] lg:max-w-[640px] lg:border-l lg:border-t-0"
+          className="absolute inset-x-0 bottom-0 z-10 flex max-h-[80%] flex-col border-t border-black/20 bg-[#f4f3f1] lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:max-h-none lg:w-[42%] lg:min-w-[420px] lg:max-w-[640px] lg:border-l lg:border-t-0"
         >
           <div ref={panelScroll} className="flex-1 overflow-y-auto px-6 pb-8 pt-8 sm:px-12 sm:pt-12">
             <div className="flex items-start justify-between gap-4">
@@ -410,17 +696,8 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
             <section className="mt-10 border-t border-black/15 pt-6">
               <p className={label}>Full definition</p>
               <div className="mt-4">
-                <DictionaryBody body={entry.main} onOpen={select} collapsed={!expanded} />
+                <DictionaryBody body={entry.main} onOpen={select} />
               </div>
-              <button
-                type="button"
-                onClick={() => setExpanded((v) => !v)}
-                aria-expanded={expanded}
-                className={`${label} mt-5 flex cursor-pointer items-center gap-1 hover:text-black`}
-              >
-                {expanded ? "Read less" : "Read more"}
-                <ChevronDown size={14} className={expanded ? "rotate-180" : ""} />
-              </button>
             </section>
           </div>
 

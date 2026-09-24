@@ -8,15 +8,15 @@ import Logo from "./Logo";
 const NAV_LINKS = [
   { label: "Courses", href: "/courses" },
   { label: "Cheatsheets", href: "/cheatsheets" },
-  { label: "Dictionary", href: "/ai-coding-dictionary" },
+  { label: "Glossary", href: "/ai-glossary" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // The dictionary is a full-screen explorer with its own home button.
-  if (pathname === "/ai-coding-dictionary") return null;
+  // The glossary is a full-screen explorer with its own home button.
+  if (pathname === "/ai-glossary") return null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
