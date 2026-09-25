@@ -40,8 +40,8 @@ type Labels = RefObject<Map<string, HTMLSpanElement>>;
 
 const projected = new Vector3();
 
-// High enough that the Core sits below the header in the top-left corner.
-const HOME_TARGET = new Vector3(-2, 0, 0);
+// The middle of the map, from the top of the Core to the bottom of the longest Branch.
+const HOME_TARGET = new Vector3(0, -3, 0);
 const EDGE_DIM = new Color("#2a2e38");
 
 function colorsFor(map: SkillMap) {

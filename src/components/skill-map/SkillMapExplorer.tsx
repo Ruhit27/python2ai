@@ -130,17 +130,9 @@ export default function SkillMapExplorer({ map }: { map: SkillMap }) {
   const learnedCount = progress.learned.size;
 
   const header = (
-    <div className="pointer-events-auto max-w-md">
-      <h1 className="font-heading text-[26px] leading-none tracking-tight sm:text-4xl">
-        Become a <span className="gradient-text">T-shaped</span> developer
-      </h1>
-      <p className="mt-2 text-sm font-medium text-muted sm:text-base">Learn broad, go deep. Every resource free.</p>
-      <p className="mt-3 text-[13px] leading-relaxed text-foreground/70">
-        The <strong className="text-foreground">Core</strong> across the top is what every developer needs. Pick one{" "}
-        <strong className="text-foreground">Branch</strong> below it to go deep in. Click any Skill to see free ways to
-        learn it.
-      </p>
-      <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
+    <div className="pointer-events-auto">
+      <h1 className="sr-only">Skill map</h1>
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
         {learnedCount} of {map.skills.length} Skills learned
         {ready.size > 0 && <span className="text-foreground/70"> · {ready.size} ready next</span>}
       </p>
@@ -265,7 +257,7 @@ export default function SkillMapExplorer({ map }: { map: SkillMap }) {
         style={{ right: insetRight }}
       >
         <div className="flex items-start justify-between gap-4">
-          <div className="-mt-3 -ml-3 rounded-2xl bg-background/60 p-3 backdrop-blur-md">{header}</div>
+          {header}
           {viewToggle}
         </div>
         <div className="flex items-end justify-between gap-4">
