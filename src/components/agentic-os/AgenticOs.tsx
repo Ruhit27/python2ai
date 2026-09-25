@@ -146,7 +146,7 @@ function LearnView({ result }: { result: LearnResult }) {
         </div>
       )}
       <div>
-        <h4 className="mb-2 font-mono text-xs uppercase tracking-[0.25em] text-violet-300">On python2ai</h4>
+        <h4 className="mb-2 font-mono text-xs uppercase tracking-[0.25em] text-violet-300">On beTshaped.dev</h4>
         {result.links.length > 0 ? (
           <ul className="flex flex-wrap gap-2">
             {result.links.map((link) => (
@@ -162,7 +162,7 @@ function LearnView({ result }: { result: LearnResult }) {
             ))}
           </ul>
         ) : (
-          <p className="text-[13px] text-slate-400">No lesson or glossary entry covers this yet.</p>
+          <p className="text-[13px] text-slate-400">No glossary entry covers this yet.</p>
         )}
       </div>
     </div>
@@ -552,7 +552,7 @@ export default function AgenticOs() {
         >
           <House size={18} />
         </Link>
-        <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan-300/70">python2ai · public demo</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan-300/70">beTshaped.dev · public demo</p>
         <h1 className="mt-2 font-mono text-2xl font-semibold uppercase tracking-[0.25em] text-cyan-50 drop-shadow-[0_0_12px_rgba(34,211,238,0.6)] md:text-3xl">
           Agentic OS
         </h1>

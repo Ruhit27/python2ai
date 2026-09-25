@@ -1,12 +1,40 @@
-# python2ai
+# beTshaped.dev
 
-A learning site that teaches programming and AI through courses. The Python course is the entry point: it takes a beginner from following tutorials to shipping small programs.
+A site that shows a Learner what to learn to become a T-shaped developer, on an interactive Skill map that links every Skill to free resources elsewhere on the web.
 
 ## Language
 
 **Learner**:
-A person taking a course on their own, with no instructor. Assumed to know little or nothing about programming.
+A person learning to become a developer on their own, with no instructor. Assumed to know little or nothing about programming.
 _Avoid_: Student, user
+
+**T-shaped developer**:
+The goal a Learner works toward: working knowledge across the broad basics every developer needs, plus real depth in one chosen specialization.
+_Avoid_: Full-stack developer, generalist
+
+**Skill map**:
+The picture of everything a Learner needs to become a T-shaped developer: the Core in the middle, with Branches reaching out from it.
+_Avoid_: Roadmap, tree, curriculum
+
+**Skill**:
+One thing on the Skill map a Learner can learn, such as Git or SQL, with a short explanation of why it matters and free resources to learn it from.
+_Avoid_: Node, topic, lesson
+
+**Core**:
+The Skills every developer needs whatever they specialize in. The horizontal bar of the T.
+_Avoid_: Fundamentals, basics, foundation
+
+**Branch**:
+A specialization a Learner chooses to go deep in, such as AI engineering or Frontend. The vertical bar of the T. A Learner has at most one chosen Branch at a time and can change it whenever they like.
+_Avoid_: Track, path, specialization
+
+**Prerequisite**:
+A Skill worth learning before another one. Advice, never a lock.
+_Avoid_: Requirement, dependency
+
+**Ready next**:
+A Skill the Learner hasn't marked as learned whose Prerequisites they all have.
+_Avoid_: Unlocked, available
 
 **Agentic OS**:
 A set of Agents that together help a Developer learn and keep up with their tools. Shown on the site as a public demo anyone can try, with nothing to install or sign in to.
@@ -21,7 +49,7 @@ The Agent that, once a day, gathers what changed in AI and developer tooling fro
 _Avoid_: Newsletter, feed, news
 
 **Learn this**:
-The Agent that takes any topic a Developer names and returns a short explanation, a 3–5 step study plan, and links to matching lessons and glossary entries on the site.
+The Agent that takes any topic a Developer names and returns a short explanation, a 3–5 step study plan, and links to matching glossary entries on the site.
 _Avoid_: Tutor, explainer, course
 
 **Dependency check**:
@@ -29,32 +57,8 @@ The Agent that takes a Developer's list of dependencies and explains what has ch
 _Avoid_: Audit, scan, upgrade
 
 **Developer**:
-A person who already writes code and wants to learn agent tooling and keep up with it. Includes Learners who have finished a course, and working developers new to the site.
+A person who already writes code and wants to learn agent tooling and keep up with it. Includes Learners well along the Skill map, and working developers new to the site.
 _Avoid_: User, customer, pro
-
-**Module project**:
-A small project that closes a module, about an hour or two long, using only what that module and earlier ones have taught.
-_Avoid_: Exercise, assignment, lab
-
-**Capstone**:
-The single larger project at the end of the course, combining skills from several module projects into one program the learner can ship. About three hours.
-_Avoid_: Final project, thesis
-
-**Rough version**:
-A half-working starting point of a module project, shown at the start of the module so the concept lessons have gaps to fix.
-_Avoid_: Starter code, skeleton
-
-**Worked example**:
-A short, fully commented code snippet inside a lesson that teaches one idea using the module project's own names and situation, usually named as the fix for a specific thing wrong with the project's rough version. A snippet that teaches syntax the project itself never uses is called out explicitly as going beyond the project, rather than left looking like part of it.
-_Avoid_: Mini-snippet, demo, exercise, throwaway example
-
-**Sample run**:
-The exact output a finished project produces for a given input, shown at the start so the learner has a target.
-_Avoid_: Demo, preview
-
-**Done-when checklist**:
-A short list of inputs and expected results that tells the learner their project is finished. Replaces quizzes as the check that a module worked.
-_Avoid_: Rubric, acceptance criteria, quiz
 
 **Ship**:
 To finish a program another person could run without the learner's help.

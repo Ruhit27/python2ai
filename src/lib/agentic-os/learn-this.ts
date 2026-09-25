@@ -1,5 +1,4 @@
 import "server-only";
-import { COURSES } from "@/data/courses";
 import { getDictionary } from "@/lib/dictionary";
 import { askJson } from "./groq";
 import { matchSiteLinks, type SiteLink } from "./site-links";
@@ -7,28 +6,16 @@ import type { LearnResult } from "./types";
 
 let catalog: SiteLink[] | null = null;
 
-/** Lessons with real content, plus every glossary entry. */
+/** Every glossary entry. */
 function siteCatalog(): SiteLink[] {
   if (catalog) return catalog;
-  const lessons: SiteLink[] = COURSES.flatMap((course) =>
-    course.modules.flatMap((module) =>
-      module.lessons
-        .filter((lesson) => lesson.content)
-        .map((lesson) => ({
-          kind: "lesson" as const,
-          title: lesson.title,
-          href: `/courses/${course.slug}`,
-          text: `${course.title} ${module.title}`,
-        })),
-    ),
-  );
   const glossary: SiteLink[] = getDictionary().terms.map((term) => ({
     kind: "glossary",
     title: term.title,
     href: `/ai-glossary?term=${term.slug}`,
     text: term.description,
   }));
-  catalog = [...lessons, ...glossary];
+  catalog = glossary;
   return catalog;
 }
 

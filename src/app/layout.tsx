@@ -22,9 +22,9 @@ const bowlbyOneSC = Bowlby_One_SC({
 });
 
 export const metadata: Metadata = {
-  title: "python2ai — Python to AI Engineer",
+  title: "beTshaped.dev — Become a T-shaped developer",
   description:
-    "Go from Python fundamentals to building AI agents, FastAPI backends, and shipping with Claude Code.",
+    "An interactive Skill map of what to learn to become a developer: the Core every developer needs, one Branch to go deep in, and free resources for every Skill.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

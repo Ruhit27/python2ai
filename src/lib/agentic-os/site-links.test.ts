@@ -5,7 +5,6 @@ const CATALOG: SiteLink[] = [
   { kind: "glossary", title: "Context window", href: "/ai-glossary?term=context-window", text: "The maximum number of tokens a model can see at once." },
   { kind: "glossary", title: "Token", href: "/ai-glossary?term=token", text: "A chunk of text the model reads and writes." },
   { kind: "glossary", title: "Subagent", href: "/ai-glossary?term=subagent", text: "An agent started by another agent to do one task." },
-  { kind: "lesson", title: "Dictionaries", href: "/courses/python", text: "Python course" },
 ];
 
 describe("matchSiteLinks", () => {

@@ -1,5 +1,5 @@
 export type SiteLink = {
-  kind: "lesson" | "glossary";
+  kind: "glossary";
   title: string;
   href: string;
   /** Extra words to match against, weighted below the title. */
@@ -22,7 +22,7 @@ function words(text: string) {
 const TITLE_WEIGHT = 3;
 const MIN_SCORE = 2;
 
-/** The site's lessons and glossary entries that best cover a topic, best first. */
+/** The site's glossary entries that best cover a topic, best first. */
 export function matchSiteLinks(topic: string, catalog: SiteLink[], max = 4): SiteLink[] {
   const wanted = new Set(words(topic));
   if (wanted.size === 0) return [];
