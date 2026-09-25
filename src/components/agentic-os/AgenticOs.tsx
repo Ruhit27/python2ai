@@ -162,7 +162,7 @@ function LearnView({ result }: { result: LearnResult }) {
             ))}
           </ul>
         ) : (
-          <p className="text-[13px] text-slate-400">No glossary entry covers this yet.</p>
+          <p className="text-[13px] text-slate-400">No Skill or glossary entry covers this yet.</p>
         )}
       </div>
     </div>

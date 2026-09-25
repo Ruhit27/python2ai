@@ -20,7 +20,7 @@ export const AGENTS: AgentInfo[] = [
   {
     id: "learn-this",
     name: "Learn this",
-    tagline: "Name any topic. Get a short explanation, a study plan, and the glossary entries on this site that cover it.",
+    tagline: "Name any topic. Get a short explanation, a study plan, and the Skills and glossary entries on this site that cover it.",
     color: "#a78bfa",
     trigger: "Runs when asked",
   },
@@ -103,8 +103,8 @@ Input: any topic a developer names.
 
 1. Explain it in two short paragraphs.
 2. Write a 3–5 step study plan.
-3. Link the glossary entries on
-   beTshaped.dev that cover it.`,
+3. Link the Skills and glossary entries
+   on beTshaped.dev that cover it.`,
               },
             ],
           },

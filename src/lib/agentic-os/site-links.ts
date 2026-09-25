@@ -1,5 +1,5 @@
 export type SiteLink = {
-  kind: "glossary";
+  kind: "skill" | "glossary";
   title: string;
   href: string;
   /** Extra words to match against, weighted below the title. */
@@ -22,7 +22,18 @@ function words(text: string) {
 const TITLE_WEIGHT = 3;
 const MIN_SCORE = 2;
 
-/** The site's glossary entries that best cover a topic, best first. */
+/** Every Skill on the map, then every glossary entry, as links Learn this can offer. */
+export function siteCatalog(
+  skills: { id: string; title: string; summary: string }[],
+  glossary: { slug: string; title: string; description: string }[],
+): SiteLink[] {
+  return [
+    ...skills.map((s) => ({ kind: "skill" as const, title: s.title, href: `/?skill=${s.id}`, text: s.summary })),
+    ...glossary.map((t) => ({ kind: "glossary" as const, title: t.title, href: `/ai-glossary?term=${t.slug}`, text: t.description })),
+  ];
+}
+
+/** The Skills and glossary entries that best cover a topic, best first. */
 export function matchSiteLinks(topic: string, catalog: SiteLink[], max = 4): SiteLink[] {
   const wanted = new Set(words(topic));
   if (wanted.size === 0) return [];

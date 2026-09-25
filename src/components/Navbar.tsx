@@ -7,7 +7,7 @@ import Logo from "./Logo";
 
 const NAV_LINKS = [
   { label: "Skill map", href: "/" },
-  { label: "Glossary", href: "/ai-glossary" },
+  { label: "AI glossary", href: "/ai-glossary" },
   { label: "Agentic OS", href: "/agentic-os" },
 ];
 

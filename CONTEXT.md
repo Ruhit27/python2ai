@@ -13,7 +13,7 @@ The goal a Learner works toward: working knowledge across the broad basics every
 _Avoid_: Full-stack developer, generalist
 
 **Skill map**:
-The picture of everything a Learner needs to become a T-shaped developer: the Core in the middle, with Branches reaching out from it.
+The picture of everything a Learner needs to become a T-shaped developer: the Core as the bar of the T, with Branches hanging from it.
 _Avoid_: Roadmap, tree, curriculum
 
 **Skill**:
@@ -49,7 +49,7 @@ The Agent that, once a day, gathers what changed in AI and developer tooling fro
 _Avoid_: Newsletter, feed, news
 
 **Learn this**:
-The Agent that takes any topic a Developer names and returns a short explanation, a 3–5 step study plan, and links to matching glossary entries on the site.
+The Agent that takes any topic a Developer names and returns a short explanation, a 3–5 step study plan, and links to matching Skills and glossary entries on the site.
 _Avoid_: Tutor, explainer, course
 
 **Dependency check**:
@@ -59,7 +59,3 @@ _Avoid_: Audit, scan, upgrade
 **Developer**:
 A person who already writes code and wants to learn agent tooling and keep up with it. Includes Learners well along the Skill map, and working developers new to the site.
 _Avoid_: User, customer, pro
-
-**Ship**:
-To finish a program another person could run without the learner's help.
-_Avoid_: Deploy, publish
