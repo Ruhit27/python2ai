@@ -13,7 +13,7 @@ The goal a Learner works toward: working knowledge across the broad basics every
 _Avoid_: Full-stack developer, generalist
 
 **Skill map**:
-The picture of everything a Learner needs to become a T-shaped developer: the Core as the bar of the T, with Branches hanging from it.
+The picture of everything a Learner needs to become a T-shaped developer, drawn as a tree: the Core is its roots and the Branches grow above them. It grows as the Learner learns.
 _Avoid_: Roadmap, tree, curriculum
 
 **Skill**:
@@ -21,11 +21,11 @@ One thing on the Skill map a Learner can learn, such as Git or SQL, with a short
 _Avoid_: Node, topic, lesson
 
 **Core**:
-The Skills every developer needs whatever they specialize in. The horizontal bar of the T.
+The Skills every developer needs whatever they specialize in: the roots of the Skill map, and the breadth of a T-shaped developer.
 _Avoid_: Fundamentals, basics, foundation
 
 **Branch**:
-A specialization a Learner chooses to go deep in, such as AI engineering or Frontend. The vertical bar of the T. A Learner has at most one chosen Branch at a time and can change it whenever they like.
+A specialization a Learner chooses to go deep in, such as AI engineering or Frontend: the depth of a T-shaped developer. A Learner has at most one chosen Branch at a time and can change it whenever they like.
 _Avoid_: Track, path, specialization
 
 **Prerequisite**:
