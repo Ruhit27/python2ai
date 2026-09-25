@@ -6,9 +6,8 @@ import { useState } from "react";
 import Logo from "./Logo";
 
 const NAV_LINKS = [
-  { label: "Courses", href: "/courses" },
-  { label: "Cheatsheets", href: "/cheatsheets" },
-  { label: "Glossary", href: "/ai-glossary" },
+  { label: "Skill map", href: "/" },
+  { label: "AI glossary", href: "/ai-glossary" },
   { label: "Agentic OS", href: "/agentic-os" },
 ];
 

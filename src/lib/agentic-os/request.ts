@@ -30,7 +30,7 @@ export async function fetchOrNull(url: string, init: RequestInit = {}) {
   try {
     const res = await fetch(url, {
       ...init,
-      headers: { "User-Agent": "python2ai-agentic-os/0.1", ...init.headers },
+      headers: { "User-Agent": "betshaped-agentic-os/0.1", ...init.headers },
       signal: AbortSignal.timeout(10_000),
     });
     return res.ok ? res : null;

@@ -9,7 +9,7 @@ export type DigestItem = { title: string; summary: string; url: string; source: 
 export type DigestTheme = { title: string; items: DigestItem[] };
 export type Digest = { generatedAt: string; themes: DigestTheme[] };
 
-export type LearnLink = { kind: "lesson" | "glossary"; title: string; href: string };
+export type LearnLink = { kind: "skill" | "glossary"; title: string; href: string };
 export type LearnResult = {
   topic: string;
   explanation: string;
