@@ -1,6 +1,6 @@
-import SkillMapExplorer from "@/components/skill-map/SkillMapExplorer";
+import SystemHome from "@/components/skill-map/SystemHome";
 import { SKILL_MAP } from "@/data/skill-map";
 
 export default function Home() {
-  return <SkillMapExplorer map={SKILL_MAP} />;
+  return <SystemHome map={SKILL_MAP} />;
 }
