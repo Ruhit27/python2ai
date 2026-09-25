@@ -16,7 +16,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   // Full-screen pages with their own home button.
-  if (pathname === "/ai-glossary" || pathname === "/agentic-os") return null;
+  if (pathname === "/" || pathname === "/ai-glossary" || pathname === "/agentic-os") return null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
