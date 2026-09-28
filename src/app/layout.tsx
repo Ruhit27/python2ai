@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono, Bowlby_One_SC } from "next/font/google";
-import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 // SF Pro can't be self-hosted, so Apple devices get it via the system font
@@ -22,9 +21,9 @@ const bowlbyOneSC = Bowlby_One_SC({
 });
 
 export const metadata: Metadata = {
-  title: "beTshaped.dev — Become a T-shaped developer",
+  title: "beTshaped.dev — Glossaries for developers",
   description:
-    "An interactive Skill map of what to learn to become a developer: the Core every developer needs, one Branch to go deep in, and free resources for every Skill.",
+    "The words developers use, explained in plain English. Explore each glossary as an interactive graph of connected terms.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -34,7 +33,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${geistMono.variable} ${bowlbyOneSC.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Navbar />
         {children}
       </body>
     </html>
