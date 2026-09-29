@@ -33,7 +33,7 @@ import {
   type InstancedMesh,
 } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import type { DictionaryTerm } from "@/lib/dictionary";
+import type { GlossaryTerm } from "@/lib/glossary";
 import { SECTION_COLORS } from "./colors";
 import { playHover } from "./sound";
 
@@ -52,7 +52,7 @@ type Props = {
   /** `section` colors nodes by curriculum section; `mono` keeps them grey. */
   colorMode: "mono" | "section";
   labelData: LabelData;
-  terms: DictionaryTerm[];
+  terms: GlossaryTerm[];
   connections: Map<string, Set<string>>;
   selected: string | null;
   matches: Set<string> | null;
@@ -83,7 +83,7 @@ type SimNode = {
   fz?: number | null;
 };
 
-function buildModel(terms: DictionaryTerm[], connections: Map<string, Set<string>>) {
+function buildModel(terms: GlossaryTerm[], connections: Map<string, Set<string>>) {
   const indexOf = new Map(terms.map((t, i) => [t.slug, i]));
   // Start slightly contracted around the precomputed layout so the graph eases
   // out into place. Starting on top of each other makes repulsion explode.
@@ -107,8 +107,8 @@ function buildModel(terms: DictionaryTerm[], connections: Map<string, Set<string
     [...(connections.get(t.slug) ?? [])].map((s) => indexOf.get(s)!),
   );
   const sim = forceSimulation(nodes, 3)
-    .force("charge", forceManyBody().strength(-30).distanceMin(2).distanceMax(40))
-    .force("link", forceLink(edges.map(([source, target]) => ({ source, target }))).distance(3.4).strength(0.3))
+    .force("charge", forceManyBody().strength(-22).distanceMin(2).distanceMax(40))
+    .force("link", forceLink(edges.map(([source, target]) => ({ source, target }))).distance(2.6).strength(0.3))
     .force("center", forceCenter(0, 0, 0))
     .force("x", forceX((d: SimNode) => d.ax).strength(0.05))
     .force("y", forceY((d: SimNode) => d.ay).strength(0.05))
@@ -548,7 +548,7 @@ function canRunEffects() {
   return !coarse && (nav.hardwareConcurrency ?? 8) > 4 && (nav.deviceMemory ?? 8) > 4;
 }
 
-export default function DictionaryGraph(props: Props) {
+export default function GlossaryGraph(props: Props) {
   const [effects, setEffects] = useState(canRunEffects);
   return (
     <Canvas camera={{ position: [0, 0, 32], fov: 50 }} dpr={[1, effects ? 1.5 : 2]}>

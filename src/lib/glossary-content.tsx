@@ -56,7 +56,7 @@ export function splitEntry(body: string) {
 }
 
 /** Renders the definition part of an entry: paragraphs and tables. */
-export function DictionaryBody({
+export function GlossaryBody({
   body,
   onOpen,
 }: {

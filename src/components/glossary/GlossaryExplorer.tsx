@@ -3,15 +3,20 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import MiniSearch from "minisearch";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, House, Info, List, Network, Palette, Pause, Play, Search, SkipBack, SkipForward, Volume2, VolumeX, X } from "lucide-react";
-import type { DictionaryData } from "@/lib/dictionary";
-import { DictionaryBody, inline, splitEntry } from "@/lib/dictionary-content";
-import type { LabelData } from "./DictionaryGraph";
+import type { GlossaryConfig } from "@/lib/glossaries";
+import type { GlossaryData } from "@/lib/glossary";
+import { GlossaryBody, inline, splitEntry } from "@/lib/glossary-content";
+import type { LabelData } from "./GlossaryGraph";
 import { SECTION_COLORS } from "./colors";
 import { playSelect, setSoundEnabled } from "./sound";
 
-const DictionaryGraph = dynamic(() => import("./DictionaryGraph"), {
+// The loading screen is created outside the component tree's props, so it
+// reads the glossary name from here.
+const GlossaryNameContext = createContext("");
+
+const GlossaryGraph = dynamic(() => import("./GlossaryGraph"), {
   ssr: false,
   loading: () => <LoadingScreen />,
 });
@@ -22,6 +27,8 @@ const GRAIN =
 
 const circleButton =
   "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-black/25 bg-[#ecebe8]/80 text-[#1a1a1a] backdrop-blur transition-colors hover:bg-black/10";
+
+const creditLink = "absolute bottom-6 left-6 text-lg font-bold tracking-tight";
 
 const label = "font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-black/55";
 
@@ -93,7 +100,7 @@ function TermList({
   selected,
   onPick,
 }: {
-  data: DictionaryData;
+  data: GlossaryData;
   mode: "section" | "alpha";
   onMode: (mode: "section" | "alpha") => void;
   selected: string | null;
@@ -108,7 +115,7 @@ function TermList({
       : Object.entries(
           [...data.terms]
             .sort((a, b) => a.title.localeCompare(b.title))
-            .reduce<Record<string, DictionaryData["terms"]>>((acc, t) => {
+            .reduce<Record<string, GlossaryData["terms"]>>((acc, t) => {
               (acc[t.title[0].toUpperCase()] ??= []).push(t);
               return acc;
             }, {}),
@@ -164,9 +171,10 @@ function TermList({
 }
 
 function LoadingScreen() {
+  const name = useContext(GlossaryNameContext);
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5 bg-[#ecebe8] text-[#1a1a1a]">
-      <p className="text-3xl font-extrabold tracking-tighter sm:text-5xl">The AI Coding Dictionary</p>
+      <p className="text-3xl font-extrabold tracking-tighter sm:text-5xl">{name}</p>
       <div className="h-[3px] w-44 overflow-hidden bg-black/10">
         <div className="h-full w-1/3 animate-pulse bg-[#1a1a1a]" />
       </div>
@@ -174,7 +182,13 @@ function LoadingScreen() {
   );
 }
 
-export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
+export default function GlossaryExplorer({
+  data,
+  config,
+}: {
+  data: GlossaryData;
+  config: GlossaryConfig;
+}) {
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -346,16 +360,18 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
     <div className="relative h-dvh w-full overflow-hidden bg-[#ecebe8] text-[#1a1a1a]">
       <div className="absolute inset-0">
         <div className="absolute inset-0">
-          <DictionaryGraph
-            insetRight={insetRight}
-            colorMode={colorMode}
-            labelData={labelData}
-            terms={data.terms}
-            connections={connections}
-            selected={selected}
-            matches={matches}
-            onSelect={select}
-          />
+          <GlossaryNameContext value={config.name}>
+            <GlossaryGraph
+              insetRight={insetRight}
+              colorMode={colorMode}
+              labelData={labelData}
+              terms={data.terms}
+              connections={connections}
+              selected={selected}
+              matches={matches}
+              onSelect={select}
+            />
+          </GlossaryNameContext>
         </div>
         <GraphLabels titles={data.terms.map((t) => t.title)} data={labelData} />
         <div
@@ -475,8 +491,8 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
                   aria-expanded={matches !== null}
                   aria-controls="search-results"
                   aria-activedescendant={results.length ? `search-result-${activeResult}` : undefined}
-                  placeholder="Search the dictionary"
-                  aria-label="Search the dictionary"
+                  placeholder="Search the glossary"
+                  aria-label="Search the glossary"
                   className="w-full bg-transparent text-sm outline-none placeholder:text-black/40"
                 />
                 <button
@@ -524,7 +540,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
           ) : (
             <button
               type="button"
-              aria-label="Search the dictionary"
+              aria-label="Search the glossary"
               onClick={() => setSearchOpen(true)}
               className={circleButton}
             >
@@ -537,7 +553,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
         <div className="absolute top-6 z-30 transition-[right] duration-300" style={{ right: insetRight + 24 }}>
           <button
             type="button"
-            aria-label="About this dictionary"
+            aria-label="About this glossary"
             aria-expanded={infoOpen}
             onClick={() => setInfoOpen((v) => !v)}
             className={circleButton}
@@ -546,30 +562,35 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
           </button>
           {infoOpen && (
             <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-black/25 bg-[#ecebe8]/95 p-4 text-sm leading-relaxed backdrop-blur">
-              <p>
-                The vocabulary of AI coding, in plain English. Drag to orbit, scroll to zoom, click a
-                term to read it.
-              </p>
-              <a
-                href="https://www.aihero.dev/ai-coding-dictionary"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-block underline underline-offset-2"
-              >
-                Original by aihero.dev
-              </a>
+              <p>{config.about}</p>
+              {config.source && (
+                <a
+                  href={config.source.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block underline underline-offset-2"
+                >
+                  {config.source.label}
+                </a>
+              )}
             </div>
           )}
         </div>
 
-        <a
-          href="https://www.aihero.dev/ai-coding-dictionary"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute bottom-6 left-6 text-lg font-bold tracking-tight"
-        >
-          AIHero.dev
-        </a>
+        {config.credit.href.startsWith("/") ? (
+          <Link href={config.credit.href} className={creditLink}>
+            {config.credit.label}
+          </Link>
+        ) : (
+          <a
+            href={config.credit.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={creditLink}
+          >
+            {config.credit.label}
+          </a>
+        )}
 
         <button
           type="button"
@@ -608,7 +629,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
           {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
 
-        <h1 className="sr-only">The AI Coding Dictionary</h1>
+        <h1 className="sr-only">{config.name}</h1>
         <article className="sr-only">
           {data.sections.map((s, i) => (
             <section key={s.title}>
@@ -696,7 +717,7 @@ export default function DictionaryExplorer({ data }: { data: DictionaryData }) {
             <section className="mt-10 border-t border-black/15 pt-6">
               <p className={label}>Full definition</p>
               <div className="mt-4">
-                <DictionaryBody body={entry.main} onOpen={select} />
+                <GlossaryBody body={entry.main} onOpen={select} />
               </div>
             </section>
           </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono, Bowlby_One_SC } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 // SF Pro can't be self-hosted, so Apple devices get it via the system font
@@ -14,23 +14,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const bowlbyOneSC = Bowlby_One_SC({
-  variable: "--font-bowlby-one-sc",
-  weight: "400",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "beTshaped.dev — Glossaries for developers",
+  title: "allglossary.xyz — Glossaries in plain English",
   description:
-    "The words developers use, explained in plain English. Explore each glossary as an interactive graph of connected terms.",
+    "The words you hear at work, explained in plain English. Explore each glossary as an interactive graph of connected terms.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistMono.variable} ${bowlbyOneSC.variable} dark h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}

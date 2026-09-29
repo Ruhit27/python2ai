@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { termSlug } from "@/lib/term-slug";
 
-export type DictionaryTerm = {
+export type GlossaryTerm = {
   slug: string;
   title: string;
   description: string;
@@ -13,24 +13,24 @@ export type DictionaryTerm = {
   position: [number, number, number];
 };
 
-export type DictionarySection = {
+export type GlossarySection = {
   title: string;
   terms: string[];
 };
 
-export type DictionaryData = {
-  sections: DictionarySection[];
-  terms: DictionaryTerm[];
+export type GlossaryData = {
+  sections: GlossarySection[];
+  terms: GlossaryTerm[];
 };
 
-const DIR = join(process.cwd(), "src/content/dictionary");
+const CONTENT = join(process.cwd(), "src/content");
 const SECTION_RE = /^## Section \d+ — (.+)$/;
 const LINK_RE = /\[[^\]]+\]\(\.\/([^)]+)\.md\)/g;
 
 
-function parseCurriculum(): DictionarySection[] {
-  const sections: DictionarySection[] = [];
-  for (const raw of readFileSync(join(DIR, "_curriculum.md"), "utf8").split("\n")) {
+function parseCurriculum(dir: string): GlossarySection[] {
+  const sections: GlossarySection[] = [];
+  for (const raw of readFileSync(join(dir, "_curriculum.md"), "utf8").split("\n")) {
     const line = raw.trimEnd();
     const heading = line.match(SECTION_RE);
     if (heading) sections.push({ title: heading[1], terms: [] });
@@ -42,8 +42,8 @@ function parseCurriculum(): DictionarySection[] {
   return sections;
 }
 
-function parseEntry(title: string) {
-  const text = readFileSync(join(DIR, `${title}.md`), "utf8");
+function parseTerm(dir: string, title: string) {
+  const text = readFileSync(join(dir, `${title}.md`), "utf8");
   const match = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) throw new Error(`${title}.md: missing frontmatter`);
   const description = match[1].match(/^description:\s*(.+)$/m)?.[1].trim();
@@ -72,7 +72,7 @@ function layout(
     const y = 1 - (2 * (i + 0.5)) / sectionCount;
     const r = Math.sqrt(1 - y * y);
     const a = Math.PI * (3 - Math.sqrt(5)) * i;
-    return [Math.cos(a) * r * 6.5, y * 6.5, Math.sin(a) * r * 6.5];
+    return [Math.cos(a) * r * 5.2, y * 5.2, Math.sin(a) * r * 5.2];
   });
   const pos = nodes.map((n) =>
     anchors[n.section].map((c) => c + (rand() - 0.5) * 4),
@@ -105,10 +105,12 @@ function layout(
   return pos.map((p) => [p[0], p[1], p[2]] as [number, number, number]);
 }
 
-export function getDictionary(): DictionaryData {
-  const sections = parseCurriculum();
+/** Loads the glossary stored in src/content/<slug>. */
+export function getGlossary(slug: string): GlossaryData {
+  const dir = join(CONTENT, slug);
+  const sections = parseCurriculum(dir);
   const entries = sections.flatMap((s, section) =>
-    s.terms.map((title) => ({ title, section, ...parseEntry(title) })),
+    s.terms.map((title) => ({ title, section, ...parseTerm(dir, title) })),
   );
   const slugs = new Map(entries.map((e, i) => [e.title, i]));
   const links = entries.map((e) => {
@@ -116,7 +118,7 @@ export function getDictionary(): DictionaryData {
     for (const m of e.body.matchAll(LINK_RE)) {
       const target = slugs.get(decodeURIComponent(m[1]));
       if (target === undefined)
-        throw new Error(`${e.title}.md links to unknown entry "${m[1]}"`);
+        throw new Error(`${e.title}.md links to unknown term "${m[1]}"`);
       out.add(target);
     }
     return [...out];
