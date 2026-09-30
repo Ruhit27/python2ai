@@ -9,7 +9,7 @@ A set of Terms from one field, such as AI coding or business, grouped into Secti
 _Avoid_: Dictionary, wiki, docs
 
 **Term**:
-One word or phrase in a Glossary, with a one-line description, a plain-English explanation, and links to related Terms. A word with several meanings is still one Term that explains each meaning and how they connect.
+One word or phrase in a Glossary, with a one-line description, a plain-English explanation, and links to related Terms. A word with several meanings is still one Term that explains each meaning and how they connect. The same word can be a Term in more than one Glossary; each explains it from its own field's angle.
 _Avoid_: Entry, node, definition
 
 **Section**:

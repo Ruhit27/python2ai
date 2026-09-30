@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import Logo from "@/components/Logo";
+import SiteHeader from "@/components/SiteHeader";
 import { GLOSSARIES } from "@/lib/glossaries";
 import { getGlossary } from "@/lib/glossary";
 
@@ -24,13 +24,13 @@ export default function Home() {
   return (
     <main id="main-content" className="flex-1">
       <div className="mx-auto flex min-h-full max-w-4xl flex-col px-4 py-12 sm:px-6 sm:py-20">
+        <SiteHeader />
         <header>
-          <Logo />
           <h1 className="mt-10 font-mono text-3xl font-semibold uppercase tracking-tight sm:text-5xl">
             Glossaries
           </h1>
           <p className="mt-4 max-w-xl text-base text-black/70 sm:text-lg">
-            The words you hear at work, explained in plain English. Pick a glossary and explore how its
+            The words you keep hearing, explained in plain English. Pick a glossary and explore how its
             terms connect.
           </p>
         </header>

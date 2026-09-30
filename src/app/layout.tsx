@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "allglossary.xyz — Glossaries in plain English",
   description:
-    "The words you hear at work, explained in plain English. Explore each glossary as an interactive graph of connected terms.",
+    "The words you keep hearing, explained in plain English. Explore each glossary as an interactive graph of connected terms.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

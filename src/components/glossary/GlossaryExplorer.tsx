@@ -563,6 +563,7 @@ export default function GlossaryExplorer({
           {infoOpen && (
             <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-black/25 bg-[#ecebe8]/95 p-4 text-sm leading-relaxed backdrop-blur">
               <p>{config.about}</p>
+              {config.note && <p className="mt-2 text-black/60">{config.note}</p>}
               {config.source && (
                 <a
                   href={config.source.href}
