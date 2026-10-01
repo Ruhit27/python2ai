@@ -15,3 +15,11 @@ _Avoid_: Entry, node, definition
 **Section**:
 A named group of related Terms within a Glossary. Terms in the same Section cluster together on the graph.
 _Avoid_: Category, chapter, topic
+
+**Sponsor**:
+A company that funds allglossary.xyz and is thanked with a card on the site.
+_Avoid_: Advertiser, partner, ad
+
+**Supporter**:
+An individual who funds allglossary.xyz. Supporters are not shown with a card.
+_Avoid_: Sponsor, donor, backer
